@@ -229,9 +229,9 @@ write_lcd:
                         beq case1
 
                         case1:
-                                GPIOValue pinE, #0 @ atribui 0 ao enable
-                                GPIOValue pinRS, #1
-                                GPIOValue pinE, #1
+                                @GPIOValue pinE, #0 @ atribui 0 ao enable
+                                @GPIOValue pinRS, #1
+                                @GPIOValue pinE, #1
                                 GPIOValue pinDB7, r4
                                 b retornar @ pula os outros casos
                         case2:
@@ -242,8 +242,8 @@ write_lcd:
                                 b retornar @ pula os outros casos
                         case4:
                                 GPIOValue pinDB4, r4
-                                GPIOValue pinE, #0
-                                @enable
+                                @GPIOValue pinE, #0
+                                enable
                 retornar:
                         sub r6, #1       @ subtrai +1 a r0
                         cmp r10, #1      @ compara o valor de r0 para saber se ja percorreu o ultimo bit

@@ -20,6 +20,7 @@ void write_textLCD(char* palavra){
 
     while(palavra[i] != '\0'){
         write_lcd(palavra[i]); // exibe no display cada caracter
+        //entryModeSet();
         i++;
     }
 }
@@ -33,7 +34,7 @@ int uart_config(){
 	uart_filestream = open("/dev/serial0", O_RDWR | O_NOCTTY | O_NDELAY); // Abre em modo escrita/leitura bloqueado
 	if (uart_filestream == -1){
 		printf("\nFalha na abertura do arquivo!\n");
-        return 0;
+        return uart_filestream;
 	}
 
     struct termios options;
@@ -45,7 +46,7 @@ int uart_config(){
     tcflush(uart_filestream, TCIFLUSH);
     tcsetattr(uart_filestream, TCSANOW, &options);
 
-    return 1;
+    return uart_filestream;
 }
 
 /**
@@ -71,18 +72,15 @@ void uart_send(char* msg, int uart_filestream){
 */
 unsigned char* uart_receive(int uart_filestream){
     unsigned char* msg;
-    unsigned char mensagem[9]; //define o tamanho da mensagem
+    unsigned char mensagem[33]; //define o tamanho da mensagem
 	if (uart_filestream != -1){
-		int msg_length = read(uart_filestream, (void*)mensagem, 8);
+		int msg_length = read(uart_filestream, (void*)mensagem, 32);
 		if (msg_length < 0){
 			printf("\nErro na leitura!\n");
 		}
-		else if (msg_length == 0){
-			printf("\nSem mensagem!\n");
-            strcpy(msg, mensagem);
-		}
 		else{
 			mensagem[msg_length] = '\0';
+            strcpy(msg, mensagem);
 		}
 	}
 	else{
@@ -93,12 +91,49 @@ unsigned char* uart_receive(int uart_filestream){
 
 int main() {
     initDisplay();  // inicializa o display lcd
-    char* text = {"Testando"};
+    char* text = {"Iniciando conexão..."};
     write_textLCD(text);
 
-    if(uart_config() == 0){
+    int uart_filestream = uart_config();
+    if(uart_filestream == -1){
         return 0;
     }
+
+    char opcao = '1';
+    char* msg = {""};
+
+    do{
+        printf("========================================\n");
+        printf("            Escolha uma opcao\n");
+        printf("----------------------------------------\n");
+        printf("| 1 | Situação atual do NodeMCU\n");
+        printf("| 2 | Valor da entrada analógica\n");
+        printf("| 3 | Valor de uma das entradas digitais\n");
+        printf("| 4 | Acender LED\n");
+        printf("| 0 | Sair\n");
+        printf("========================================\n");
+        printf("=>  ");
+
+        scanf("%s", &opcao);
+        system("cls || clear");
+        //msg = uart_receive(uart_filestream); //recebe a mensagem
+        //printf(msg);
+        switch(opcao){
+            case '1':
+                break;
+            case '2':
+                break;
+            case '3':
+                break;
+            case '4':
+                break;
+            case '0':
+                printf("\n\n\tFinalizando...\n");
+                break;
+            default:
+                printf("\n\nOpcao invalida!\n\n");
+        }
+    } while(opcao);
 
     return 0;
 }
