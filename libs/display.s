@@ -227,7 +227,7 @@ write_lcd:
                         sub r6, #1       @ subtrai +1 a r0
                         cmp r10, #1      @ compara o valor de r0 para saber se ja percorreu o ultimo bit
         bne loop_bit
-	
+	nanoSleep timespecnano5
 bx lr
 
 @ variaveis utilizadas no codigo
