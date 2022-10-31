@@ -1,4 +1,4 @@
-#include "libs/display.h"
+#include "display.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,16 +13,17 @@
 /**
  * Escre um texto no display LCD
  * @param  palavra[] - texto a ser escrito no display
-*/
-void write_textLCD(char* palavra){
+ */
+void write_textLCD(char palavra[]){
     clearDisplay(); // limpa o display
     int i = 0;
 
     while(palavra[i] != '\0'){
-        write_lcd(palavra[i]); // exibe no display cada caracter
-        //entryModeSet();
+	printf("%c", palavra[i]);
+        write_lcd(palavra[i]); // exibe no display cada caractere
         i++;
     }
+    printf("\n");
 }
 
 /**
@@ -91,10 +92,11 @@ unsigned char* uart_receive(int uart_filestream){
 
 int main() {
     initDisplay();  // inicializa o display lcd
-    char* text = {"Iniciando conexão..."};
+    char text[] = "Iniciando conexão...";
+
     write_textLCD(text);
 
-    int uart_filestream = uart_config();
+    /*int uart_filestream = uart_config();
     if(uart_filestream == -1){
         return 0;
     }
@@ -133,7 +135,7 @@ int main() {
             default:
                 printf("\n\nOpcao invalida!\n\n");
         }
-    } while(opcao);
+    } while(opcao);*/
 
     return 0;
 }
