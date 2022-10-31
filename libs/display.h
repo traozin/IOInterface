@@ -4,7 +4,7 @@
 extern void clearDisplay();
 extern void entryModeSet();
 extern void initDisplay();
-extern void moveCursor(void);
+extern void moveCursor();
 extern void write_lcd(char c);
 
 #endif
