@@ -19,7 +19,7 @@ IPAddress local_IP(10, 0, 0, 109);
 IPAddress gateway(10, 0, 0, 1);
 IPAddress subnet(255, 255, 0, 0);
 
-void setup() {
+void config_connect(){
   // inicializacao do nodemcu com o modulo wifi
   Serial.begin(115200);
   Serial.println("Booting");
@@ -75,30 +75,33 @@ void setup() {
   Serial.println("Ready");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+}
 
+void setup() {
+  // realiza a configuracao inicial para conexao via wifi com nodemcu
+  config_connect();
+  
   // definicao dos pinos
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(9600);
+  
 }
 
 void loop() {
   ArduinoOTA.handle();
-  
-  byte msg = Serial.read();
-  if(msg != ''){
-    digitalWrite(LED_BUILTIN, LOW);
-  }
 
-  /*switch(msg){
-    case '0x03':
-      break;
-    case '0x04':
-      break;
-    case '0x05':
-      break;
-    case '0x06':
-      digitalWrite(LED_BUILTIN, LOW);
-      break;
-  }*/
-  
+  if(Serial.available() > 0){
+    String msg = Serial.readString();
+    if(msg == "0x03"){
+      
+    }else if(msg == "0x04"){
+       
+    }else if(msg == "0x05"){
+       
+    }else if(msg == "0x06"){
+       digitalWrite(LED_BUILTIN, LOW);
+    }else {
+      
+    }
+  } 
 }
