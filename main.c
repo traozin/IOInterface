@@ -9,23 +9,6 @@
 #include <fcntl.h>
 #include <termios.h>
 
-
-/**
- * Escre um texto no display LCD
- * @param  palavra[] - texto a ser escrito no display
- */
-void write_textLCD(char palavra[]){
-    clearDisplay(); // limpa o display
-    int i = 0;
-
-    while(palavra[i] != '\0'){
-	printf("%c", palavra[i]);
-        write_lcd(palavra[i]); // exibe no display cada caractere
-        i++;
-    }
-    printf("\n");
-}
-
 /**
  * Realiza as configuracoes iniciais da UART
 */
@@ -92,7 +75,7 @@ unsigned char* uart_receive(int uart_filestream){
 
 int main() {
     initDisplay();  // inicializa o display lcd
-    char text[] = "Iniciando conexão...";
+    char text[] = "Bolsonaro 2026!!!";
 
     write_textLCD(text);
 

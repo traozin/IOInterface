@@ -3,7 +3,7 @@
 
 
 .global clearDisplay
-.global entryModeSet
+.global moveCursor
 .global initDisplay
 .global write_lcd
 
@@ -137,7 +137,7 @@ bx lr
                 nanoSleep: presente no map.s, utilizada
                 para aguardar um determinado tempo
   ------------------------------------------------------*/
-entryModeSet:
+moveCursor:
         setDisplay 0, 0, 0, 0, 0
         setDisplay 0, 1, 1, 1, 0
         nanoSleep timespecnano150
@@ -152,7 +152,7 @@ bx lr
         Inicializa o display e faz o mapeamento dos pinos
   ======================================================
         Macros utilizadas:  
-                entryModeset
+                moveCursor
                 init
                 setOut
 
