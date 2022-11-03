@@ -7,7 +7,7 @@
 
 int main() {
     initDisplay();  // inicializa o display lcd
-    char text[] = "Bolsonaro 2026!!!";
+    char text[] = "SD ---- 2";
     write_textLCD(text);
 
     int uart_filestream = uart_config();
@@ -57,7 +57,7 @@ int main() {
             default:
                 printf("\n\n\tOpcao invalida!\n\n");
         }
-    } while(opcao);
+    } while(opcao != '0');
 
     return 0;
 }
