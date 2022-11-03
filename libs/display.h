@@ -32,7 +32,7 @@ void write_textLCD(char palavra[]){
     int i = 0;
 
     while(palavra[i] != '\0'){
-	printf("%c", palavra[i]);
+	    printf("%c", palavra[i]);
         write_lcd(palavra[i]); // exibe no display cada caractere
         i++;
     }

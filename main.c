@@ -1,124 +1,63 @@
 #include "display.h"
+#include "uart_rasp.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-//Usado para comunicacao UART
-#include <unistd.h>	
-#include <fcntl.h>
-#include <termios.h>
-
-/**
- * Realiza as configuracoes iniciais da UART
-*/
-int uart_config(){
-    //Abertura do arquivo da UART
-	int uart_filestream = -1;
-	uart_filestream = open("/dev/serial0", O_RDWR | O_NOCTTY | O_NDELAY); // Abre em modo escrita/leitura bloqueado
-	if (uart_filestream == -1){
-		printf("\nFalha na abertura do arquivo!\n");
-        return uart_filestream;
-	}
-
-    struct termios options;
-    tcgetattr(uart_filestream, &options);
-    options.c_cflag = B9600 | CS8 | CLOCAL | CREAD;
-    options.c_iflag = IGNPAR;
-    options.c_oflag = 0;
-    options.c_lflag = 0;
-    tcflush(uart_filestream, TCIFLUSH);
-    tcsetattr(uart_filestream, TCSANOW, &options);
-
-    return uart_filestream;
-}
-
-/**
- * Envia uma mensagem via UART
- * @param msg - texto a ser enviado
- * @param uart_filestream - arquivo uart
-*/
-void uart_send(char* msg, int uart_filestream){
-	if (uart_filestream != -1){	//Se abriu o arquivo da UART
-		int c = write(uart_filestream, msg, strlen(msg));
-        if(c == -1){
-            printf("\nFalha ao enviar mensagem!\n");
-        }
-	}	
-	else{
-		printf("\nFalha na abertura do arquivo!\n");
-	}
-}
-
-/**
- * Envia uma mensagem via UART
- * @param uart_filestream - arquivo uart
-*/
-unsigned char* uart_receive(int uart_filestream){
-    unsigned char* msg;
-    unsigned char mensagem[33]; //define o tamanho da mensagem
-	if (uart_filestream != -1){
-		int msg_length = read(uart_filestream, (void*)mensagem, 32);
-		if (msg_length < 0){
-			printf("\nErro na leitura!\n");
-		}
-		else{
-			mensagem[msg_length] = '\0';
-            strcpy(msg, mensagem);
-		}
-	}
-	else{
-		printf("\nFalha na abertura do arquivo");
-	}
-    return msg;
-}
-
 int main() {
     initDisplay();  // inicializa o display lcd
     char text[] = "Bolsonaro 2026!!!";
-
     write_textLCD(text);
 
-    /*int uart_filestream = uart_config();
+    int uart_filestream = uart_config();
     if(uart_filestream == -1){
+        printf("\nFalha na abertura do arquivo!\n");
         return 0;
     }
 
     char opcao = '1';
-    char* msg = {""};
-
+    char* msg = "";
     do{
         printf("========================================\n");
         printf("            Escolha uma opcao\n");
         printf("----------------------------------------\n");
-        printf("| 1 | Situação atual do NodeMCU\n");
-        printf("| 2 | Valor da entrada analógica\n");
-        printf("| 3 | Valor de uma das entradas digitais\n");
-        printf("| 4 | Acender LED\n");
+        printf("| 1 | Situação atual do NodeMCU\n"); // 0x03
+        printf("| 2 | Valor da entrada analógica\n"); // 0x04
+        printf("| 3 | Valor das entradas digitais\n"); // 0x05
+        printf("| 4 | Acender/Apagar LED\n"); // 0x06
         printf("| 0 | Sair\n");
         printf("========================================\n");
         printf("=>  ");
-
         scanf("%s", &opcao);
-        system("cls || clear");
-        //msg = uart_receive(uart_filestream); //recebe a mensagem
-        //printf(msg);
+        system("cls || clear"); 
+        
         switch(opcao){
             case '1':
+                uart_send("0x03", uart_filestream);
                 break;
             case '2':
+                uart_send("0x04", uart_filestream);
+
+                //msg = uart_receive(uart_filestream);
+                //write_textLCD(msg);
                 break;
             case '3':
+                uart_send("0x05", uart_filestream);
+
+                //msg = uart_receive(uart_filestream);
+                //write_textLCD(msg);
                 break;
             case '4':
+                uart_send("0x06", uart_filestream);
                 break;
             case '0':
                 printf("\n\n\tFinalizando...\n");
                 break;
             default:
-                printf("\n\nOpcao invalida!\n\n");
+                printf("\n\n\tOpcao invalida!\n\n");
         }
-    } while(opcao);*/
+    } while(opcao);
 
     return 0;
 }
