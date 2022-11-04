@@ -81,10 +81,10 @@ void setup() {
   // realiza a configuracao inicial para conexao via wifi com nodemcu
   config_connect();
   
-  // definicao dos pinos
-  pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(9600);
-  
+
+  // definicao dos pinos
+  pinMode(LED_BUILTIN, OUTPUT);  
 }
 
 void loop() {
