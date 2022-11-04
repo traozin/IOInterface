@@ -90,18 +90,32 @@ void setup() {
 void loop() {
   ArduinoOTA.handle();
 
-  if(Serial.available() > 0){
-    String msg = Serial.readString();
-    if(msg == "0x03"){
-      
-    }else if(msg == "0x04"){
-       
-    }else if(msg == "0x05"){
-       
-    }else if(msg == "0x06"){
-       digitalWrite(LED_BUILTIN, LOW);
+  //int n_bytes = Serial.availableForWrite(); //Retorna o número de bytes (caracteres) livres no buffer de transmissão serial que podem ser ocupados sem bloquear a operação de trasnmissão.
+  
+  if(Serial.available() > 0){ // Retorna o número de bytes (caracteres) disponíveis para leitura da porta serial.
+    String msg = Serial.readString(); // Le uma String
+    if(msg == "3"){
+      Serial.write("1F");
+    }else if(msg == "4"){
+      Serial.write(analogRead(A0) * (3.3/1023.0));
+    }else if(msg == "5"){
+      Serial.write(digitalRead(D0));
+    }else if(msg == "6"){
+      //Serial.write(10);
+      if(digitalRead(LED_BUILTIN) == HIGH){
+        digitalWrite(LED_BUILTIN, LOW);
+      }else{
+        digitalWrite(LED_BUILTIN, HIGH);
+      }
+      int bytesSent = Serial.write("TESTE");
     }else {
-      
+      // pisco o led caso a mensagem nao seja reconhecida
+      for(int i=0; i<100; i++){
+        digitalWrite(LED_BUILTIN,LOW);
+        delay(200);
+        digitalWrite(LED_BUILTIN,HIGH);
+        delay(200);
+      }
     }
   } 
 }

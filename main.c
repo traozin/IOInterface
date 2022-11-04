@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 int main() {
     initDisplay();  // inicializa o display lcd
@@ -34,22 +35,22 @@ int main() {
         
         switch(opcao){
             case '1':
-                uart_send("0x03", uart_filestream);
+                uart_send("3", uart_filestream);
                 break;
             case '2':
-                uart_send("0x04", uart_filestream);
-
-                //msg = uart_receive(uart_filestream);
+                uart_send("4", uart_filestream);
+                sleep(2);
+                //uart_receive(uart_filestream);
                 //write_textLCD(msg);
                 break;
             case '3':
-                uart_send("0x05", uart_filestream);
-
-                //msg = uart_receive(uart_filestream);
+                uart_send("5", uart_filestream);
+                sleep(2);
+                //uart_receive(uart_filestream);
                 //write_textLCD(msg);
                 break;
             case '4':
-                uart_send("0x06", uart_filestream);
+                uart_send("6", uart_filestream);
                 break;
             case '0':
                 printf("\n\n\tFinalizando...\n");

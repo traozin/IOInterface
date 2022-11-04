@@ -51,7 +51,11 @@ void uart_send(char* msg, int uart_filestream){
 */
 char* uart_receive(int uart_filestream){
     char* mensagem = ""; //define o tamanho da mensagem
-	int msg_length = read(uart_filestream, (void*)mensagem, 32);
+	int msg_length = read(uart_filestream, (void*)mensagem, 31);
+	
+	printf("\n\nTamanho da mensagem: %i\n\n", msg_length);
+	printf("\n\nMensagem: %s\n\n", mensagem);
+	
 	if (msg_length < 0){
 		printf("\nErro na leitura!\n");
 	}
@@ -60,5 +64,17 @@ char* uart_receive(int uart_filestream){
 	}
     return mensagem;
 }
+
+/*void uart_receive(int uart_filestream){
+    char mensagem[2]; //define o tamanho da mensagem
+	int msg_length = read(uart_filestream, (void*)mensagem, 1);
+	
+	printf("\n\nTamanho da mensagem: %i\n\n", msg_length);
+	printf("\n\nMensagem: %s\n\n", mensagem);
+	
+	if (msg_length < 0){
+		printf("\nErro na leitura!\n");
+	}
+}*/
 
 #endif
