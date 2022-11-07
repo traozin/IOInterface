@@ -19,8 +19,6 @@ IPAddress local_IP(10, 0, 0, 109);
 IPAddress gateway(10, 0, 0, 1);
 IPAddress subnet(255, 255, 0, 0);
 
-// Entradas digitais e analogicas
-int d = D0;
 
 /**
  * Configura a comunicacao com o nodemcu via WIFI
@@ -91,32 +89,63 @@ void setup() {
   // definicao dos pinos
   pinMode(LED_BUILTIN, OUTPUT);  
 
-
+  // Limpa o burffer da porta serial
+  if(Serial.available() > 0){ 
+    Serial.readString();
+  }
+  
   // pisca o led do nodemcu no momento da execucao
   for(int i=0; i<10; i++){
-        digitalWrite(LED_BUILTIN,LOW);
-        delay(200);
-        digitalWrite(LED_BUILTIN,HIGH);
-        delay(200);
+    digitalWrite(LED_BUILTIN,LOW);
+    delay(50);
+    digitalWrite(LED_BUILTIN,HIGH);
+    delay(50);
   }
+
 }
 
 void loop() {
   ArduinoOTA.handle();
-  
+
   if(Serial.available() > 0){ // Retorna o número de bytes (caracteres) 
                               // disponíveis para leitura da porta serial.
     String msg = Serial.readString(); // Le uma String
     
     if(msg[0] == '3'){
-      Serial.print("00");
+      Serial.write("00");
     }
     else if(msg[0] == '4'){
-      Serial.print(analogRead(A0) * (3.3/1023.0));
+      Serial.print(analogRead(A0));
     }
     else if(msg[0] == '5'){
-      
-      //d += msg[1] - '1'; // recebe o pino a ser verificado
+      // Entradas digitais e analogicas
+      int d;
+      switch(msg[1]){
+        case '1':
+          d = D0;
+          break;
+        case '2':
+          d = D1;
+          break;
+        case '3':
+          d = D2;
+          break;
+        case '4':
+          d = D3;
+          break;
+        case '5':
+          d = D4;
+          break;
+        case '6':
+          d = D5;
+          break;
+        case '7':
+          d = D6;
+          break;
+        case '8':
+          d = D7;
+          break;
+      }
       Serial.print(digitalRead(d));
     }
     else if(msg[0] == '6'){
@@ -133,11 +162,11 @@ void loop() {
       // envia a mensagem de erro
       Serial.print("1F");
       // pisco o led caso a mensagem nao seja reconhecida
-      for(int i=0; i<100; i++){
+      for(int i=0; i<5; i++){
         digitalWrite(LED_BUILTIN,LOW);
-        delay(200);
+        delay(400);
         digitalWrite(LED_BUILTIN,HIGH);
-        delay(200);
+        delay(400);
       }
     }
   } 
