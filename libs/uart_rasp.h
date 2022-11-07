@@ -9,6 +9,8 @@
 #include <unistd.h>	
 #include <fcntl.h>
 #include <termios.h>
+#include <time.h>
+
 
 /**
  * Realiza as configuracoes iniciais da UART
@@ -50,31 +52,23 @@ void uart_send(char* msg, int uart_filestream){
  * @param uart_filestream - arquivo uart
 */
 char* uart_receive(int uart_filestream){
-    char* mensagem = ""; //define o tamanho da mensagem
-	int msg_length = read(uart_filestream, (void*)mensagem, 31);
-	
-	printf("\n\nTamanho da mensagem: %i\n\n", msg_length);
-	printf("\n\nMensagem: %s\n\n", mensagem);
-	
-	if (msg_length < 0){
-		printf("\nErro na leitura!\n");
+	static char mensagem[] = ""; //define o tamanho da mensagem
+	int msg_length = -1;
+
+	while(msg_length == -1){
+		msg_length = read(uart_filestream, (void*)mensagem, 10);
+		if(msg_length > 0){
+			mensagem[msg_length] = '\0';
+			if(mensagem == "1F"){
+				char texto[] = "NodeMCU com problema!";
+				printf("\n%s\n", texto);
+				write_textLCD(texto);
+			}
+		}
 	}
-	else{
-		mensagem[msg_length] = '\0';
-	}
-    return mensagem;
+
+	printf("\nMsg: %s\n", mensagem);
+	printf("\nTamanho: %i\n", msg_length);
+	return mensagem;
 }
-
-/*void uart_receive(int uart_filestream){
-    char mensagem[2]; //define o tamanho da mensagem
-	int msg_length = read(uart_filestream, (void*)mensagem, 1);
-	
-	printf("\n\nTamanho da mensagem: %i\n\n", msg_length);
-	printf("\n\nMensagem: %s\n\n", mensagem);
-	
-	if (msg_length < 0){
-		printf("\nErro na leitura!\n");
-	}
-}*/
-
 #endif
