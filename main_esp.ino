@@ -112,7 +112,7 @@ void loop() {
     String msg = Serial.readString(); // Le uma String
     
     if(msg[0] == '3'){
-      Serial.write("00");
+      Serial.print("00");
     }
     else if(msg[0] == '4'){
       Serial.print(analogRead(A0));
