@@ -90,38 +90,48 @@ void setup() {
 
   // definicao dos pinos
   pinMode(LED_BUILTIN, OUTPUT);  
+
+
+  // pisca o led do nodemcu no momento da execucao
+  for(int i=0; i<10; i++){
+        digitalWrite(LED_BUILTIN,LOW);
+        delay(200);
+        digitalWrite(LED_BUILTIN,HIGH);
+        delay(200);
+  }
 }
 
 void loop() {
   ArduinoOTA.handle();
-
-  //int n_bytes = Serial.availableForWrite(); //Retorna o número de bytes (caracteres) livres no buffer de transmissão serial que podem ser ocupados sem bloquear a operação de trasnmissão.
   
   if(Serial.available() > 0){ // Retorna o número de bytes (caracteres) 
                               // disponíveis para leitura da porta serial.
     String msg = Serial.readString(); // Le uma String
     
-    if(msg[0] == "3"){
-      Serial.write("00");
+    if(msg[0] == '3'){
+      Serial.print("00");
     }
-    else if(msg[0] == "4"){
+    else if(msg[0] == '4'){
       Serial.print(analogRead(A0) * (3.3/1023.0));
     }
-    else if(msg[0] == "5"){
-      //d += msg[1]; // recebe o pino a ser verificado
-      Serial.write(digitalRead(d));
+    else if(msg[0] == '5'){
+      
+      //d += msg[1] - '1'; // recebe o pino a ser verificado
+      Serial.print(digitalRead(d));
     }
-    else if(msg[0] == "6"){
+    else if(msg[0] == '6'){
       if(digitalRead(LED_BUILTIN) == HIGH){
         digitalWrite(LED_BUILTIN, LOW);
+        Serial.print("1");
       }
       else{
         digitalWrite(LED_BUILTIN, HIGH);
+        Serial.print("0");
       }
     }
     else {
       // envia a mensagem de erro
-      Serial.write("1F");
+      Serial.print("1F");
       // pisco o led caso a mensagem nao seja reconhecida
       for(int i=0; i<100; i++){
         digitalWrite(LED_BUILTIN,LOW);
