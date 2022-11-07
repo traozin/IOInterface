@@ -1,30 +1,42 @@
-# Timer
+# IOInterface
+
+<details>
+<summary>Texto do Problema</summary>
+
+---
 
 ## Tema
-Desenvolvimento de programas usando linguagem Assembly e aplicação de conceitos
-básicos de arquitetura de computadores.
+
+Projeto de sensor analógico/digital em microcontrolador utilizando comunicação serial.
 
 ## Objetivos de Aprendizagem
 
 Ao final da realização deste problema, o/a discente deverá ser capaz de:
-- Programar em Assembly para um processador com arquitetura ARM;
-- Entender o conjunto de instruções da arquitetura ARM e saber como utilizá-las de
-acordo com a necessidade do sistema;
-- Entender como montar uma biblioteca a partir de um código assembly;
-- Avaliar o desempenho de um código assembly através de medidas sobre o
-comportamento de sua execução no sistema.
+
+- Entender como integrar código assembly e códigos C para produzir um programa executável;
+- Compreender e executar a programação de dispositivos microcontroladores;
+- Assimilar conceitos básicos sobre protocolos de comunicação serial.
 
 ## Problema
+Dando prosseguimento ao desenvolvimento do protótipo de um sistema digital baseado em um processador ARM, o próximo passo compreende a implementação de um protótipo de sistema de sensoriamento genérico. Na fase de protótipo do projeto será utilizada uma plataforma baseada na NodeMCU para confecção das unidades de sensoriamento. Elas são muito flexíveis e versáteis, sendo ideais para a criação de um ecossistema de Internet das Coisas (IoT). Para simplificar a prova de  conceito será utilizado um sensor analógico e dois sensores digitais, mas o sistema deve ser modular, permitindo a substituição na versão de produção.
 
-Desenvolver um aplicativo de temporização (timer) que apresente a contagem num
-display LCD. O tempo inicial deverá ser configurado diretamente no código. Além disso,
-deverão ser usados 2 botões de controle: 1 para iniciar/parar a contagem e outro para reiniciar
-a partir do tempo definido.
+O sistema será comandado por um Single Board Computer (SBC), e deve ser capaz de controlar o acionamento de um conjunto variável de sensores, assim como monitorar o seu funcionamento, de forma automatizada. Cada operação de leitura ou monitoramento deve ser representada por um código. Dessa forma, o sistema embarcado na NodeMCU deve ser capaz de interpretá-los e realizá-los de maneira adequada, por meio de uma comunicação UART.
 
-Com o objetivo de desenvolver uma biblioteca para uso futuro em conjunto com um
-programa em linguagem C, a função para enviar mensagem para o display deve estar
-separada como uma biblioteca (.o), e permitir no mínimo as seguinte operações:
+---
 
-1. Limpar display; 
-2. Escrever caractere; 
-3. Posicionar cursor (linha e coluna).
+</details>
+
+## Autores
+<div align="justify">
+    <li><a href="https://github.com/ozenilsoncruz">@Ozenilson Cruz</a></li>  <li><a href="https://github.com/traozin">@Antônio Neto</a></li>
+</div>
+
+## Node MCU
+
+## UART
+
+## Biblioteca ASB em C
+
+## Digitais vs Analógicos
+
+
