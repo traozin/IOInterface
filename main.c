@@ -1,5 +1,5 @@
-#include "libs/display.h"
-#include "libs/uart_rasp.h"
+#include "display.h"
+#include "uart_rasp.h"
 
 #include <pthread.h>
 #include <stdio.h>
@@ -14,7 +14,7 @@ pthread_t id_thread;
 
 int main() {
     initDisplay();  // inicializa o display lcd
-    char text[] = "SD ---- 2";
+    char text[] = "Problema 2 - SD";
     write_textLCD(text);
 
     int uart_filestream = uart_config();
@@ -26,6 +26,7 @@ int main() {
     //cria uma thread que recebe as mensagens
     //pthread_create(&id_thread, NULL, receive_msg, &uart_filestream);
 
+    char sensor = '1';
     char opcao = '/';
     do{
         printf("========================================\n");
@@ -39,28 +40,37 @@ int main() {
         printf("========================================\n");
         printf("=>  ");
         scanf("%s", &opcao);
-        system("cls || clear"); 
-        
+        system("cls || clear");
+
         switch(opcao){
             case '1':
-                //msg = "Situacao da NodeMCU: ";
                 uart_send("30", uart_filestream);
-                //sleep(3);
+		if(uart_receive(uart_filestream) == "00"){
+			write_textLCD("NodeMCU OK!");
+		}
                 break;
             case '2': // sensor analogico
+		msg = "Sensor analogico: ";
                 uart_send("40", uart_filestream);
                 break;
             case '3': // sensor digital
-                /*char sensor[] = "";
-                printf("Qual sensor digital deseja selecionar? \n =>  ");
+                /*printf("\nQual sensor digital deseja selecionar? [1-8] \n =>  ");
                 scanf("%s", &sensor);
-                int sensor = atoi(sensor);*/
-                uart_send("50", uart_filestream);
+		if(sensor >= '1' && sensor <= '8'){
+			uart_send("51", uart_filestream);
+			uart_receive(uart_filestream);
+			msg = "Sensor digital: ";
+		}else{
+			printf("\nOpção inválida!\n");
+		}*/
                 break;
             case '4':
-                msg = "";
                 uart_send("60", uart_filestream);
-                write_textLCD("LED acionado!");
+		if(uart_receive(uart_filestream)[0] == '1'){
+                        write_textLCD("LED ligado!");
+                }else{
+			write_textLCD("LED desligado!");
+		}
                 break;
             case '0':
                 printf("\n\n\tFinalizando...\n");
@@ -77,12 +87,11 @@ int main() {
  * Recebe a mensagem e escreve no display continuamente
  * @param uart_filestream - arquivo UART
 */
-void * receive_msg(void * uart_filestream){
-    int uart_filestream = *((int *) uart_filestream);
-    
+void * receive_msg(void * uart){
+    int uart_filestream = *((int *) uart);
+
     while(1){
-        if(msg != ""){            
-            sleep(1); // aguarda 1 segundo para receber cada msg
+        if(msg != ""){
             char* texto = uart_receive(uart_filestream);
             if(texto != ""){
                 char* n_msg = strcat(msg, texto);
