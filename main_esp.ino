@@ -19,8 +19,13 @@ IPAddress local_IP(10, 0, 0, 109);
 IPAddress gateway(10, 0, 0, 1);
 IPAddress subnet(255, 255, 0, 0);
 
+// Entradas digitais e analogicas
+int d = D0;
+
+/**
+ * Configura a comunicacao com o nodemcu via WIFI
+*/
 void config_connect(){
-  // inicializacao do nodemcu com o modulo wifi
   Serial.begin(115200);
   Serial.println("Booting");
 
@@ -92,23 +97,31 @@ void loop() {
 
   //int n_bytes = Serial.availableForWrite(); //Retorna o número de bytes (caracteres) livres no buffer de transmissão serial que podem ser ocupados sem bloquear a operação de trasnmissão.
   
-  if(Serial.available() > 0){ // Retorna o número de bytes (caracteres) disponíveis para leitura da porta serial.
+  if(Serial.available() > 0){ // Retorna o número de bytes (caracteres) 
+                              // disponíveis para leitura da porta serial.
     String msg = Serial.readString(); // Le uma String
-    if(msg == "3"){
-      Serial.write("1F");
-    }else if(msg == "4"){
-      Serial.write(analogRead(A0) * (3.3/1023.0));
-    }else if(msg == "5"){
-      Serial.write(digitalRead(D0));
-    }else if(msg == "6"){
-      //Serial.write(10);
+    
+    if(msg[0] == "3"){
+      Serial.write("00");
+    }
+    else if(msg[0] == "4"){
+      Serial.print(analogRead(A0) * (3.3/1023.0));
+    }
+    else if(msg[0] == "5"){
+      //d += msg[1]; // recebe o pino a ser verificado
+      Serial.write(digitalRead(d));
+    }
+    else if(msg[0] == "6"){
       if(digitalRead(LED_BUILTIN) == HIGH){
         digitalWrite(LED_BUILTIN, LOW);
-      }else{
+      }
+      else{
         digitalWrite(LED_BUILTIN, HIGH);
       }
-      int bytesSent = Serial.write("TESTE");
-    }else {
+    }
+    else {
+      // envia a mensagem de erro
+      Serial.write("1F");
       // pisco o led caso a mensagem nao seja reconhecida
       for(int i=0; i<100; i++){
         digitalWrite(LED_BUILTIN,LOW);
