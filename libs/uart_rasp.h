@@ -64,6 +64,7 @@ char* uart_receive(int uart_filestream){
 				char texto[] = "NodeMCU com problema!";
 				write_textLCD(texto);
 			}
+			printf("\n\n\n %s \n\n\n", mensagem);
 		}
 	}
 	return mensagem;
