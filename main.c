@@ -51,10 +51,8 @@ int main() {
                 break;
             case '2': // sensor analogico
                 uart_send("40", uart_filestream);
-                // alteraMsg("Sensor analogico: ");
-                //uart_receive(uart_filestream);
 
-		char* texto = "";
+		char texto[] = "";
 		char* result = uart_receive(uart_filestream);
 		sprintf(texto, "Sensor A: %s", result);
 
@@ -68,10 +66,9 @@ int main() {
                     uart_send("5", uart_filestream);
 	  	    uart_send(sensor, uart_filestream);
 
-                    char* texto = "";
+                    char texto[] = "";
                     char* result = uart_receive(uart_filestream);
                     sprintf(texto, "Sensor D%s: %s", sensor, result);
-		    // alteraMsg(("Sensor digital %c: ", sensor));
 
                     write_textLCD(texto);
                 }else{
