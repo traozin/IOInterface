@@ -25,7 +25,7 @@ int main() {
     //cria uma thread que recebe as mensagens
     //pthread_create(&id_thread, NULL, receiveMsg, &uart_filestream);
 
-    char sensor = '/';
+    char sensor[] = "0";
     char opcao = '/';
     do{
         printf("========================================\n");
@@ -52,17 +52,28 @@ int main() {
             case '2': // sensor analogico
                 uart_send("40", uart_filestream);
                 // alteraMsg("Sensor analogico: ");
-                // uart_receive(uart_filestream);
-                // write_textLCD(("Sensor analogico: %s", uart_receive(uart_filestream)));
+                //uart_receive(uart_filestream);
+
+		char* texto = "";
+		char* result = uart_receive(uart_filestream);
+		sprintf(texto, "Sensor A: %s", result);
+
+		write_textLCD(texto);
                 break;
             case '3': // sensor digital
                 printf("\nQual sensor digital deseja selecionar? [1-8] \n =>  ");
                 scanf("%s", &sensor);
-                if(sensor >= '1' && sensor <= '8'){
-                    uart_send(("5%c", sensor), uart_filestream);
-                    // alteraMsg(("Sensor digital %c: ", sensor));
-                    // uart_receive(uart_filestream);
-                    // write_textLCD(("Sensor digital %c: %s", sensor, uart_receive(uart_filestream)));
+
+                if(sensor[0] >= '1' && sensor[0] <= '8' && strlen(sensor) == 1){
+                    uart_send("5", uart_filestream);
+	  	    uart_send(sensor, uart_filestream);
+
+                    char* texto = "";
+                    char* result = uart_receive(uart_filestream);
+                    sprintf(texto, "Sensor D%s: %s", sensor, result);
+		    // alteraMsg(("Sensor digital %c: ", sensor));
+
+                    write_textLCD(texto);
                 }else{
                     printf("\nOpção inválida!\n");
                 }
@@ -77,6 +88,7 @@ int main() {
                 }
                 break;
             case '0':
+		// alteraMsg("F"); // sinal para a finalizacao da thread
                 printf("\n\n\tFinalizando...\n");
                 break;
             default:
@@ -95,11 +107,11 @@ void * receiveMsg(void * uart){
     int uart_filestream = *((int *) uart);
     char* texto = "";
     char* n_msg = "";
-    while(1){
-        if(msg != ""){
+    while(strcmp(msg, "F") != 0){
+        if(strcmp(msg, "") != 0){
             strcpy(texto, msg); // copia o conteude da msg para outra variavel
             n_msg = uart_receive(uart_filestream);
-            if(n_msg != ""){ 
+            if(strcmp(n_msg, "") != 0){
                 strcat(texto, n_msg); // concatena o conteudo da da msg com o da nova string
                 write_textLCD(texto);
             }
