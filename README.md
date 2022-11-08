@@ -31,7 +31,7 @@ O sistema será comandado por um Single Board Computer (SBC), e deve ser capaz d
     <li><a href="https://github.com/ozenilsoncruz">@Ozenilson Cruz</a></li>  <li><a href="https://github.com/traozin">@Antônio Neto</a></li>
 </div>
 
-## UART [^rohde-uart][^freebsd-uart]
+## UART [^rohde-uart] [^freebsd-uart]
 
 O UART(Transmissor/receptor assíncrono universal) é um protocolo de transmissão de dados muito simples, onde só é necessário apenas dois fios para a comunicação entre suas extremidades em ambas as direções. Além disso, o UART é um dos padrões seriais mais antigos do mundo, onde acabou sendo amplamente utilizado em dispositivos que faziam uso de portas seriais.
 
@@ -63,7 +63,31 @@ Depois que os bits de dados tiverem terminado, o bit final indica o fim dos dado
 
 Os bits de dados são dados de usuário ou bits "úteis" e vêm imediatamente depois do bit inicial. Pode haver de 5 a 9 bits de dados de usuários, apesar de ser mais comum haver 7 ou 8 bits. Esses bits de dados geralmente são transmitidos com o bit menos significativo primeiro.
 
-## Node MCU
+## Node MCU [^nodemcu]
+
+<figure style="text-align:center">
+  <img src="assets/pinagem-nodemcu.png" height="250em"/>
+  <figcaption>Diagrama de Mapeamento de Pinos do ESP8266</figcaption>
+</figure>
+
+- Módulo NodeMcu Lua ESP-12E
+- Versão do módulo: V2
+- Memória flash: 4 MB
+- Tensão de operação:
+- Pinos Digitais: 3,3 V
+- Pino Analógico: 1,0 V
+- Wireless padrão 802.11 b/g/n
+- Antena embutida
+- Conector micro-usb para programação e alimentação
+- Modos de operação: STA/AP/STA+AP
+- Suporta 5 conexões TCP/IP
+- Portas GPIO: 13
+- D0 (GPIO16) só pode ser usado como entrada ou saída, não suporta outras funções (interrupção, PWM, I2C, etc)
+- GPIO com funções de PWM, I2C, SPI, etc
+- Resolução do PWM: 10 bits (valores de 0 a 1023)
+- 01x Conversor analógico digital (ADC)
+- Distância entre pinos: 2,54 mm
+- Dimensões: 49 x 26 x 7 mm (sem considerar os pinos)
 
 ## Biblioteca ASB em C
 
@@ -73,3 +97,5 @@ Os bits de dados são dados de usuário ou bits "úteis" e vêm imediatamente de
 [^rohde-uart]: Compreender UART - [rohde-schwarz.com](https://www.rohde-schwarz.com/br/produtos/teste-e-medicao/osciloscopios/educational-content/compreender-uart_254524.html)
 
 [^freebsd-uart]: Tutorial sobre Comunicações Seriais e UART - [docs.freebsd.org](https://docs.freebsd.org/pt-br/articles/serial-uart/)
+
+[^nodemcu]: NodeMCU ESP8266-12 V2 Especificações - [robocore.net](https://www.robocore.net/wifi/nodemcu-esp8266-12-v2)
