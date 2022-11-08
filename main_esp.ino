@@ -1,3 +1,4 @@
+
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
@@ -90,8 +91,8 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);  
 
   // Limpa o burffer da porta serial
-  if(Serial.available() > 0){ 
-    Serial.readString();
+  while(Serial.available() > 0){ 
+    Serial.read();
   }
   
   // pisca o led do nodemcu no momento da execucao
@@ -106,7 +107,7 @@ void setup() {
 
 void loop() {
   ArduinoOTA.handle();
-
+  
   if(Serial.available() > 0){ // Retorna o número de bytes (caracteres) 
                               // disponíveis para leitura da porta serial.
     String msg = Serial.readString(); // Le uma String
@@ -157,7 +158,7 @@ void loop() {
         Serial.print("0");
       }
     }
-    else {
+    else{
       // envia a mensagem de erro
       Serial.print("1F");
       // pisco o led caso a mensagem nao seja reconhecida
