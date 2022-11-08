@@ -118,7 +118,6 @@ void loop() {
       Serial.print(analogRead(A0));
     }
     else if(msg[0] == '5'){
-      // Entradas digitais e analogicas
       int d;
       switch(msg[1]){
         case '1':

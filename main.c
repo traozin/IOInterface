@@ -14,8 +14,7 @@ pthread_t id_thread;
 
 int main() {
     initDisplay();  // inicializa o display lcd
-    char text[] = "Problema 2 - SD";
-    write_textLCD(text);
+    write_textLCD("Problema 2 - SD");
 
     int uart_filestream = uart_config();
     if(uart_filestream == -1){
@@ -24,9 +23,9 @@ int main() {
     }
 
     //cria uma thread que recebe as mensagens
-    //pthread_create(&id_thread, NULL, receive_msg, &uart_filestream);
+    //pthread_create(&id_thread, NULL, receiveMsg, &uart_filestream);
 
-    char sensor = '1';
+    char sensor = '/';
     char opcao = '/';
     do{
         printf("========================================\n");
@@ -44,33 +43,38 @@ int main() {
 
         switch(opcao){
             case '1':
+                // alteraMsg("");
                 uart_send("30", uart_filestream);
-		if(uart_receive(uart_filestream) == "00"){
-			write_textLCD("NodeMCU OK!");
-		}
+                if(strcmp(uart_receive(uart_filestream), "00") == 0){
+                    write_textLCD("NodeMCU OK!");
+                }
                 break;
             case '2': // sensor analogico
-		msg = "Sensor analogico: ";
                 uart_send("40", uart_filestream);
+                // alteraMsg("Sensor analogico: ");
+                // uart_receive(uart_filestream);
+                // write_textLCD(("Sensor analogico: %s", uart_receive(uart_filestream)));
                 break;
             case '3': // sensor digital
-                /*printf("\nQual sensor digital deseja selecionar? [1-8] \n =>  ");
+                printf("\nQual sensor digital deseja selecionar? [1-8] \n =>  ");
                 scanf("%s", &sensor);
-		if(sensor >= '1' && sensor <= '8'){
-			uart_send("51", uart_filestream);
-			uart_receive(uart_filestream);
-			msg = "Sensor digital: ";
-		}else{
-			printf("\nOpção inválida!\n");
-		}*/
+                if(sensor >= '1' && sensor <= '8'){
+                    uart_send(("5%c", sensor), uart_filestream);
+                    // alteraMsg(("Sensor digital %c: ", sensor));
+                    // uart_receive(uart_filestream);
+                    // write_textLCD(("Sensor digital %c: %s", sensor, uart_receive(uart_filestream)));
+                }else{
+                    printf("\nOpção inválida!\n");
+                }
                 break;
             case '4':
+                // alteraMsg("");
                 uart_send("60", uart_filestream);
-		if(uart_receive(uart_filestream)[0] == '1'){
-                        write_textLCD("LED ligado!");
+                if(uart_receive(uart_filestream)[0] == '1'){
+                    write_textLCD("LED ligado!");
                 }else{
-			write_textLCD("LED desligado!");
-		}
+                    write_textLCD("LED desligado!");
+                }
                 break;
             case '0':
                 printf("\n\n\tFinalizando...\n");
@@ -87,15 +91,17 @@ int main() {
  * Recebe a mensagem e escreve no display continuamente
  * @param uart_filestream - arquivo UART
 */
-void * receive_msg(void * uart){
+void * receiveMsg(void * uart){
     int uart_filestream = *((int *) uart);
-
+    char* texto = "";
+    char* n_msg = "";
     while(1){
         if(msg != ""){
-            char* texto = uart_receive(uart_filestream);
-            if(texto != ""){
-                char* n_msg = strcat(msg, texto);
-                write_textLCD(n_msg);
+            strcpy(texto, msg); // copia o conteude da msg para outra variavel
+            n_msg = uart_receive(uart_filestream);
+            if(n_msg != ""){ 
+                strcat(texto, n_msg); // concatena o conteudo da da msg com o da nova string
+                write_textLCD(texto);
             }
         }
     }
@@ -105,7 +111,7 @@ void * receive_msg(void * uart){
  * Altera o valor da mensagem utilizando mutex para evitar conflitos
  * @param nova_msg - nova mensagem a ser atribuida
 */
-void alteramsg(char* nova_msg){
+void alteraMsg(char* nova_msg){
     pthread_mutex_lock(&mutex); // segura o recurso
     msg = nova_msg;
     pthread_mutex_unlock(&mutex); // libera o recurso

@@ -55,20 +55,16 @@ char* uart_receive(int uart_filestream){
 	static char mensagem[] = ""; //define o tamanho da mensagem
 	int msg_length = -1;
 
-	while(msg_length == -1){
-		msg_length = read(uart_filestream, (void*)mensagem, 10);
+	while(msg_length == -1 || msg_length == 0){
+		msg_length = read(uart_filestream, (void*)mensagem, 5);
 		if(msg_length > 0){
 			mensagem[msg_length] = '\0';
-			if(mensagem == "1F"){
+			if(strcmp(mensagem, "1F") == 0){
 				char texto[] = "NodeMCU com problema!";
-				printf("\n%s\n", texto);
 				write_textLCD(texto);
 			}
 		}
 	}
-
-	printf("\nMsg: %s\n", mensagem);
-	printf("\nTamanho: %i\n", msg_length);
 	return mensagem;
 }
 #endif
