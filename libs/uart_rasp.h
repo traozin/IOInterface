@@ -54,6 +54,7 @@ void uart_send(char* msg, int uart_filestream){
 char* uart_receive(int uart_filestream){
 	static char mensagem[] = ""; //define o tamanho da mensagem
 	int msg_length = -1;
+	sleep(2);
 
 	while(msg_length == -1 || msg_length == 0){
 		msg_length = read(uart_filestream, (void*)mensagem, 5);
