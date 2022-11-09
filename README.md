@@ -51,7 +51,7 @@ Como o próprio nome já diz, o UART é um protocolo de comunicação assíncron
 
 Frames UART contém bits iniciais e finais, bits de dados e um bit opcional de paridade.
 
-#### Bits iniciais e finais
+##### Bits iniciais e finais
 
 Devido ao UART ser assíncrono, o transmissor precisa sinalizar que os bits de dados estão chegando. Isso é possível ao utilizar o bit inicial. O bit inicial é uma transição do estado inativo para um estado baixo, imediatamente seguido pelos bits de dados do usuário.
 
@@ -60,7 +60,7 @@ Depois que os bits de dados tiverem terminado, o bit final indica o fim dos dado
 ##### Bit de paridade
  Um segundo bit final (opcional) pode ser configurado, geralmente para dar ao receptor tempo para se preparar para o próximo frame, mas essa é uma prática relativamente incomum.
 
-#### Bits de dados
+##### Bits de dados
 
 Os bits de dados são dados de usuário ou bits "úteis" e vêm imediatamente depois do bit inicial. Pode haver de 5 a 9 bits de dados de usuários, apesar de ser mais comum haver 7 ou 8 bits. Esses bits de dados geralmente são transmitidos com o bit menos significativo primeiro.
 
@@ -90,9 +90,23 @@ Os bits de dados são dados de usuário ou bits "úteis" e vêm imediatamente de
 - Distância entre pinos: 2,54 mm
 - Dimensões: 49 x 26 x 7 mm (sem considerar os pinos)
 
-## Biblioteca ASB em C
+## Biblioteca Assembly em C
 
-## Digitais vs Analógicos
+## Sensores Digitais vs Analógicos [^sensores]
+
+O termo "sensor" em si significa um mecanismo projetado para medir um parâmetro, a fim de processar ainda mais o resultado da medição. O circuito do sensor gera um sinal de forma conveniente para a transmissão e, em seguida, o sinal é convertido, processado ou armazenado.
+
+##### Analógico
+
+Um sensor analógico gera um sinal analógico na saída, cujo valor de nível é obtido em função do tempo, e esse sinal muda continuamente, o sinal constantemente recebe qualquer um dos muitos valores possíveis.
+
+Portanto, sensores analógicos são adequados para rastrear continuamente a grandeza física, por exemplo tensão terminal do termopar sinaliza uma mudança de temperatura e a tensão no enrolamento secundário do transformador de corrente é em um determinado período proporcional à corrente do circuito controlado. O microfone é um sensor de mudanças de pressão de uma onda sonora, etc.
+
+##### Digital
+
+Os sensores digitais, por sua vez, geram um sinal de saída que pode ser gravado na forma de uma sequência de valores numéricos, geralmente o sinal é binário, ou seja, um nível alto ou baixo (zero). Quando um sinal de sensor digital precisa ser transmitido por um canal analógico, como o rádio, recorra ao uso da modulação.
+
+Os sensores digitais dominam os sistemas de comunicação porque seus sinais de saída são facilmente regenerados no repetidor, mesmo se houver ruído. E o sinal analógico, nesse sentido, será distorcido pelo ruído e os dados serão imprecisos. Ao transmitir informações, os sensores digitais são mais aceitáveis. Eles são adequados para detectar a presença ou ausência de um objeto, por exemplo.
 
 
 [^rohde-uart]: Compreender UART - [rohde-schwarz.com](https://www.rohde-schwarz.com/br/produtos/teste-e-medicao/osciloscopios/educational-content/compreender-uart_254524.html)
@@ -100,3 +114,5 @@ Os bits de dados são dados de usuário ou bits "úteis" e vêm imediatamente de
 [^freebsd-uart]: Tutorial sobre Comunicações Seriais e UART - [docs.freebsd.org](https://docs.freebsd.org/pt-br/articles/serial-uart/)
 
 [^nodemcu]: NodeMCU ESP8266-12 V2 Especificações - [robocore.net](https://www.robocore.net/wifi/nodemcu-esp8266-12-v2)
+
+[^sensores]: Qual é a diferença entre sensores analógicos e digitais - [i.electricianexp.com](https://i.electricianexp.com/pt/main/praktika/1185-analogovye-i-cifrovye-datchiki.html)
