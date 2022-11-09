@@ -67,7 +67,7 @@ Os bits de dados são dados de usuário ou bits "úteis" e vêm imediatamente de
 ## Node MCU [^nodemcu]
 
 <figure style="align:center">
-  <img src="assets/pinagem-nodemcu.png" height="250em"/>
+  <img src="assets/pinagem-nodemcu.png" height="350em"/>
   <figcaption>Diagrama de Mapeamento de Pinos do ESP8266</figcaption>
 </figure>
 
