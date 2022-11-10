@@ -35,20 +35,24 @@ O sistema será comandado por um Single Board Computer (SBC), e deve ser capaz d
 
 Esse projeto necessita que o usuário tenha a IDE do Arduino instalada em sua máquina, necessária para comunicação com a NodeMCU. Para isso, siga as instruções do link abaixo:
 
-1. Siga os passos para fazer a [Instalação do Arduino IDE](https://www.arduino.cc/en/Guide/Windows#toc4)
-2. Siga os passos para fazer a [Instalação do Driver da NodeMCU](google.com)
-
-3. Em uma Raspiberry Pi Zero W, clone o repositório.
+1. Siga os passos para fazer a [Instalação do Arduino IDE](https://www.arduino.cc/en/Guide/Windows#toc4).
+2. Siga os passos para fazer a [Instalação do Driver da NodeMCU](google.com).
+3. Baixe o arquivo main_esp.ino e faça upload para o NodeMCU.
+4. Em uma Raspiberry Pi Zero W, clone o repositório.
    ```sh
    git clone https://github.com/ozenilsoncruz/IOInterface.git
    ```
-4. Dentro da pasta do repositório execute os passos abaixo:
-    1. 
-    2. Makefile:
-          ```sh
-          make
-          ```
-    3. Script 
+5. Dentro da pasta do repositório execute os passos abaixo: 
+    1. Makefile:
+		  - Para compilar o código que utiliza threads:
+              ```sh
+              make main=main_threads outhres=-lpthreads
+              ```
+          - Para compilar o código sem threads:
+              ```sh
+              make main=main
+              ```
+    2. Execute com: 
           ```sh
           sudo ./main
           ```
@@ -85,6 +89,67 @@ Depois que os bits de dados tiverem terminado, o bit final indica o fim dos dado
 ##### Bits de dados
 
 Os bits de dados são dados de usuário ou bits "úteis" e vêm imediatamente depois do bit inicial. Pode haver de 5 a 9 bits de dados de usuários, apesar de ser mais comum haver 7 ou 8 bits. Esses bits de dados geralmente são transmitidos com o bit menos significativo primeiro.
+
+--------------------------------------------------------------------------
+##### Problema
+```c
+/**
+ * Envia uma mensagem via UART
+ * @param uart_filestream - arquivo uart
+*/
+char* uart_receive(int uart_filestream){
+	static char mensagem[] = ""; //define o tamanho da mensagem
+	int msg_length = -1;
+	sleep(2);
+
+	while(msg_length <= 0){ // se a mensagem for menor ou igual a zero
+		msg_length = read(uart_filestream, (void*)mensagem, 5); // ate 5 bytes
+		if(msg_length > 0){
+			mensagem[msg_length] = '\0';
+			if(strcmp(mensagem, "1F") == 0){
+				char texto[] = "Erro na NodeMCU!";
+				write_textLCD(texto);
+			}
+		}
+	}
+	return mensagem;
+}
+```
+
+##### Solução
+
+```c
+/**
+ * Envia uma mensagem com o tamanho especificado
+ * @param uart_filestream - arquivo uart
+ * @param tamanho_mensagem - tamanho da mensagem a ser recebida
+*/
+char* uart_receive(int uart_filestream, int tamanho_mensagem){
+	static char mensagem[] = ""; //define o tamanho da mensagem
+	int tamanho = 0;
+	int tamanho_mensagem_aux = tamanho_mensagem;
+
+	while(tamanho < tamanho_mensagem){ // se a mensagem for menor ou igual a zero
+		char aux[] = ""; //variavel auxiliar que armazena o tamanho da string
+		msg_length = read(uart_filestream, (void*)aux, tamanho_mensagem_aux);
+		
+		if(msg_length > 0){
+			aux[msg_length] = '\0';
+			if(strcmp(aux, "1F") == 0){
+				char texto[] = "Erro na NodeMCU!";
+				mensagem = ""
+				write_textLCD(texto);
+			}else{
+				tamanho = tamanho + msg_length;
+				tamanho_mensagem_aux = tamanho_mensagem_aux - msg_length;
+				sprintf(mensagem, "%s", aux); // concatena o resultado dentro do loop 
+			}
+		}
+	}
+	return mensagem;
+}
+```
+--------------------------------------------------------------------------
 
 ## Node MCU [^nodemcu]
 
