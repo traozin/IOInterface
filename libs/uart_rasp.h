@@ -48,25 +48,33 @@ void uart_send(char* msg, int uart_filestream){
 }
 
 /**
- * Envia uma mensagem via UART
+ * Envia uma mensagem com o tamanho especificado
  * @param uart_filestream - arquivo uart
+ * @param tamanho_mensagem - tamanho da mensagem a ser recebida
 */
-char* uart_receive(int uart_filestream){
+char* uart_receive(int uart_filestream, int tamanho_mensagem){
 	static char mensagem[] = ""; //define o tamanho da mensagem
 	int msg_length = -1;
-	sleep(2);
+	int tamanho = 0;
+	int tamanho_mensagem_aux = tamanho_mensagem;
 
-	while(msg_length == -1 || msg_length == 0){
-		msg_length = read(uart_filestream, (void*)mensagem, 5);
+	while(tamanho < tamanho_mensagem){ // se a mensagem for menor ou igual a zero
+		char aux[] = ""; //variavel auxiliar que armazena o tamanho da string
+		msg_length = read(uart_filestream, (void*)aux, tamanho_mensagem_aux); // ate 5 bytes
+		
 		if(msg_length > 0){
-			mensagem[msg_length] = '\0';
-			if(strcmp(mensagem, "1F") == 0){
-				char texto[] = "NodeMCU com problema!";
+			aux[msg_length] = '\0';
+			if(strcmp(aux, "1F") == 0){
+				char texto[] = "Erro na NodeMCU!";
 				write_textLCD(texto);
+			}else{
+				tamanho = tamanho + msg_length;
+				tamanho_mensagem_aux = tamanho_mensagem_aux - msg_length;
+				sprintf(mensagem, "%s", aux); // concatena o resultado dentro do loop 
 			}
-			printf("\n\n\n %s \n\n\n", mensagem);
 		}
 	}
 	return mensagem;
 }
+
 #endif
