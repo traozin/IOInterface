@@ -1,30 +1,180 @@
-# Timer
+# IOInterface
+
+<details>
+<summary>Texto do Problema</summary>
+
+---
 
 ## Tema
-Desenvolvimento de programas usando linguagem Assembly e aplicação de conceitos
-básicos de arquitetura de computadores.
+
+Projeto de sensor analógico/digital em microcontrolador utilizando comunicação serial.
 
 ## Objetivos de Aprendizagem
 
 Ao final da realização deste problema, o/a discente deverá ser capaz de:
-- Programar em Assembly para um processador com arquitetura ARM;
-- Entender o conjunto de instruções da arquitetura ARM e saber como utilizá-las de
-acordo com a necessidade do sistema;
-- Entender como montar uma biblioteca a partir de um código assembly;
-- Avaliar o desempenho de um código assembly através de medidas sobre o
-comportamento de sua execução no sistema.
+
+- Entender como integrar código assembly e códigos C para produzir um programa executável;
+- Compreender e executar a programação de dispositivos microcontroladores;
+- Assimilar conceitos básicos sobre protocolos de comunicação serial.
 
 ## Problema
+Dando prosseguimento ao desenvolvimento do protótipo de um sistema digital baseado em um processador ARM, o próximo passo compreende a implementação de um protótipo de sistema de sensoriamento genérico. Na fase de protótipo do projeto será utilizada uma plataforma baseada na NodeMCU para confecção das unidades de sensoriamento. Elas são muito flexíveis e versáteis, sendo ideais para a criação de um ecossistema de Internet das Coisas (IoT). Para simplificar a prova de  conceito será utilizado um sensor analógico e dois sensores digitais, mas o sistema deve ser modular, permitindo a substituição na versão de produção.
 
-Desenvolver um aplicativo de temporização (timer) que apresente a contagem num
-display LCD. O tempo inicial deverá ser configurado diretamente no código. Além disso,
-deverão ser usados 2 botões de controle: 1 para iniciar/parar a contagem e outro para reiniciar
-a partir do tempo definido.
+O sistema será comandado por um Single Board Computer (SBC), e deve ser capaz de controlar o acionamento de um conjunto variável de sensores, assim como monitorar o seu funcionamento, de forma automatizada. Cada operação de leitura ou monitoramento deve ser representada por um código. Dessa forma, o sistema embarcado na NodeMCU deve ser capaz de interpretá-los e realizá-los de maneira adequada, por meio de uma comunicação UART.
 
-Com o objetivo de desenvolver uma biblioteca para uso futuro em conjunto com um
-programa em linguagem C, a função para enviar mensagem para o display deve estar
-separada como uma biblioteca (.o), e permitir no mínimo as seguinte operações:
+---
 
-1. Limpar display; 
-2. Escrever caractere; 
-3. Posicionar cursor (linha e coluna).
+</details>
+
+## Autores
+<div align="justify">
+    <li><a href="https://github.com/ozenilsoncruz">@Ozenilson Cruz</a></li>  <li><a href="https://github.com/traozin">@Antônio Neto</a></li>
+</div>
+
+### Instruções
+
+Esse projeto necessita que o usuário tenha a IDE do Arduino instalada em sua máquina, necessária para comunicação com a NodeMCU. Para isso, siga as instruções do link abaixo:
+
+1. Siga os passos para fazer a [Instalação do Arduino IDE](https://www.arduino.cc/en/Guide/HomePage)
+2. Siga os passos para fazer a [Instalação do Driver da NodeMCU](https://www.arduino.cc/en/Guide/Windows#toc4)
+
+3. Em uma Raspiberry Pi Zero W, clone o repositório.
+   ```sh
+   git clone https://github.com/ozenilsoncruz/IOInterface.git
+   ```
+4. Dentro da pasta do repositório execute os passos abaixo:
+    1. 
+    2. Makefile:
+          ```sh
+          make
+          ```
+    3. Script 
+          ```sh
+          sudo ./main
+          ```
+
+## UART [^rohde-uart] [^freebsd-uart]
+
+O UART(Transmissor/receptor assíncrono universal) é um protocolo de transmissão de dados muito simples, onde só é necessário apenas dois fios para a comunicação entre suas extremidades em ambas as direções. Além disso, o UART é um dos padrões seriais mais antigos do mundo, onde acabou sendo amplamente utilizado em dispositivos que faziam uso de portas seriais.
+
+Existem dois tipos de comunicação Serial, a Síncrona e a Assíncrona. 
+
+A comunicação Síncrona requer que o emissor e o receptor dos dados tenham um clock em comum, ou no mínimo, o emissor forneça um sinal de tempo para que o receptor saiba quando se deve "ler" o próximo bit dos dados. Na maioria das formas de comunicação serial síncrona, se não houver dados disponíveis em um dado instante para transmitir, um caractere de preenchimento deve ser enviado para que os dados sejam sempre transmitidos.
+
+Já a transmissão assíncrona permite que os dados sejam transmitidos sem que o emissor tenha que enviar um sinal de relógio ao receptor. Em vez disso, o remetente e o receptor devem concordar com os parâmetros de tempo de antecedência e bits especiais são adicionados a cada palavra, os quais são usados para sincronizar as unidades de envio e recebimento.
+
+Como o próprio nome já diz, o UART é um protocolo de comunicação assíncrona, sendo assim, ambas as extremidades devem transmitir ao mesmo tempo e em velocidade predefinida para poder ter a mesma temporização de bits. As taxas de baud mais comuns utilizadas em UART atualmente são 4800, 9600, 19,2 K, 57,6 K e 115,2 K. Além de ter a mesma taxa de bauds, ambos os lados de uma conexão UART também têm que usar a mesma estrutura de frames e parâmetros.
+
+<figure style="align:center">
+  <img src="assets/frame-uart.png"/>
+  <figcaption>Frame UART</figcaption>
+</figure>
+
+
+Frames UART contém bits iniciais e finais, bits de dados e um bit opcional de paridade.
+
+##### Bits iniciais e finais
+
+Devido ao UART ser assíncrono, o transmissor precisa sinalizar que os bits de dados estão chegando. Isso é possível ao utilizar o bit inicial. O bit inicial é uma transição do estado inativo para um estado baixo, imediatamente seguido pelos bits de dados do usuário.
+
+Depois que os bits de dados tiverem terminado, o bit final indica o fim dos dados do usuário. O bit de parada é uma transição de volta para o estado alto ou inativo, ou a permanência no estado alto for um tempo de bit adicional.
+
+##### Bit de paridade
+ Um segundo bit final (opcional) pode ser configurado, geralmente para dar ao receptor tempo para se preparar para o próximo frame, mas essa é uma prática relativamente incomum.
+
+##### Bits de dados
+
+Os bits de dados são dados de usuário ou bits "úteis" e vêm imediatamente depois do bit inicial. Pode haver de 5 a 9 bits de dados de usuários, apesar de ser mais comum haver 7 ou 8 bits. Esses bits de dados geralmente são transmitidos com o bit menos significativo primeiro.
+
+## Node MCU [^nodemcu]
+
+<figure style="align:center">
+  <img src="assets/pinagem-nodemcu.png" height="350em"/>
+  <figcaption>Diagrama de Mapeamento de Pinos do ESP8266</figcaption>
+</figure>
+
+- Módulo NodeMcu Lua ESP-12E
+- Versão do módulo: V2
+- Memória flash: 4 MB
+- Tensão de operação:
+- Pinos Digitais: 3,3 V
+- Pino Analógico: 1,0 V
+- Wireless padrão 802.11 b/g/n
+- Antena embutida
+- Conector micro-usb para programação e alimentação
+- Modos de operação: STA/AP/STA+AP
+- Suporta 5 conexões TCP/IP
+- Portas GPIO: 13
+- D0 (GPIO16) só pode ser usado como entrada ou saída, não suporta outras funções (interrupção, PWM, I2C, etc)
+- GPIO com funções de PWM, I2C, SPI, etc
+- Resolução do PWM: 10 bits (valores de 0 a 1023)
+- 01x Conversor analógico digital (ADC)
+- Distância entre pinos: 2,54 mm
+- Dimensões: 49 x 26 x 7 mm (sem considerar os pinos)
+
+## Biblioteca Assembly em C [^sLib]
+
+As funções definidas em assembly que serão chamadas de C devem ser prototipadas como “C” externo em C.
+
+O Exemplo 1 abaixo ilustra uma função C chamada main(), que chama uma função de linguagem assembly chamada asmfunc, que é mostrada no Exemplo 2. A função asmfunc pega seu único argumento, adiciona-o à variável global C chamada gvar e retorna o resultado.
+
+
+Exemplo 1: Chamando uma função de linguagem assembly de um programa C.
+
+```c
+extern "C" {
+extern int asmfunc(int a); /* declare external asm function */
+int gvar = 0; /* define global variable */
+}
+
+void main()
+{
+    int I = 5;
+
+    I = asmfunc(I); /* call function normally */
+}
+```
+Exemplo 2: Programa em linguagem assembly chamado pelo exemplo 1
+
+```s
+         .global asmfunc
+         .global gvar
+asmfunc:
+         LDR r1, gvar_a
+         LDR r2, [r1, #0]
+         ADD r0, r0, r2
+         STR r0, [r1, #0]
+         MOV pc, lr
+gvar_a .field gvar, 32
+```
+
+No programa C do Exemplo 1, a declaração externa “C” diz ao compilador para usar convenções de nomenclatura C (ou seja, sem desmembramento de nomes). Quando o vinculador resolve a referência .global _asmfunc, a definição correspondente no arquivo de montagem corresponderá.
+
+O parâmetro i é passado em R0 e o resultado é retornado em R0. R1 contém o endereço do gvar global. R2 mantém o valor de gvar antes de adicionar o valor i a ele.
+
+## Sensores Digitais vs Analógicos [^sensores]
+
+O termo "sensor" em si significa um mecanismo projetado para medir um parâmetro, a fim de processar ainda mais o resultado da medição. O circuito do sensor gera um sinal de forma conveniente para a transmissão e, em seguida, o sinal é convertido, processado ou armazenado.
+
+##### Analógico
+
+Um sensor analógico gera um sinal analógico na saída, cujo valor de nível é obtido em função do tempo, e esse sinal muda continuamente, o sinal constantemente recebe qualquer um dos muitos valores possíveis.
+
+Portanto, sensores analógicos são adequados para rastrear continuamente a grandeza física, por exemplo tensão terminal do termopar sinaliza uma mudança de temperatura e a tensão no enrolamento secundário do transformador de corrente é em um determinado período proporcional à corrente do circuito controlado. O microfone é um sensor de mudanças de pressão de uma onda sonora, etc.
+
+##### Digital
+
+Os sensores digitais, por sua vez, geram um sinal de saída que pode ser gravado na forma de uma sequência de valores numéricos, geralmente o sinal é binário, ou seja, um nível alto ou baixo (zero). Quando um sinal de sensor digital precisa ser transmitido por um canal analógico, como o rádio, recorra ao uso da modulação.
+
+Os sensores digitais dominam os sistemas de comunicação porque seus sinais de saída são facilmente regenerados no repetidor, mesmo se houver ruído. E o sinal analógico, nesse sentido, será distorcido pelo ruído e os dados serão imprecisos. Ao transmitir informações, os sensores digitais são mais aceitáveis. Eles são adequados para detectar a presença ou ausência de um objeto, por exemplo.
+
+
+[^rohde-uart]: Compreender UART - [rohde-schwarz.com](https://www.rohde-schwarz.com/br/produtos/teste-e-medicao/osciloscopios/educational-content/compreender-uart_254524.html)
+
+[^freebsd-uart]: Tutorial sobre Comunicações Seriais e UART - [docs.freebsd.org](https://docs.freebsd.org/pt-br/articles/serial-uart/)
+
+[^nodemcu]: NodeMCU ESP8266-12 V2 Especificações - [robocore.net](https://www.robocore.net/wifi/nodemcu-esp8266-12-v2)
+
+[^sensores]: Qual é a diferença entre sensores analógicos e digitais - [i.electricianexp.com](https://i.electricianexp.com/pt/main/praktika/1185-analogovye-i-cifrovye-datchiki.html)
+
+[^sLib]: Interfacing C and C++ With Assembly Language - [software-dl.ti.com](https://software-dl.ti.com/codegen/docs/tiarmclang/compiler_tools_user_guide/compiler_manual/runtime_environment/interfacing-c-and-c-with-assembly-language-stdz0544217.html)
