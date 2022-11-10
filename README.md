@@ -31,6 +31,28 @@ O sistema será comandado por um Single Board Computer (SBC), e deve ser capaz d
     <li><a href="https://github.com/ozenilsoncruz">@Ozenilson Cruz</a></li>  <li><a href="https://github.com/traozin">@Antônio Neto</a></li>
 </div>
 
+### Instruções
+
+Esse projeto necessita que o usuário tenha a IDE do Arduino instalada em sua máquina, necessária para comunicação com a NodeMCU. Para isso, siga as instruções do link abaixo:
+
+1. Siga os passos para fazer a [Instalação do Arduino IDE](https://www.arduino.cc/en/Guide/HomePage)
+2. Siga os passos para fazer a [Instalação do Driver da NodeMCU](https://www.arduino.cc/en/Guide/Windows#toc4)
+
+3. Em uma Raspiberry Pi Zero W, clone o repositório.
+   ```sh
+   git clone https://github.com/ozenilsoncruz/IOInterface.git
+   ```
+4. Dentro da pasta do repositório execute os passos abaixo:
+    1. 
+    2. Makefile:
+          ```sh
+          make
+          ```
+    3. Script 
+          ```sh
+          sudo ./main
+          ```
+
 ## UART [^rohde-uart] [^freebsd-uart]
 
 O UART(Transmissor/receptor assíncrono universal) é um protocolo de transmissão de dados muito simples, onde só é necessário apenas dois fios para a comunicação entre suas extremidades em ambas as direções. Além disso, o UART é um dos padrões seriais mais antigos do mundo, onde acabou sendo amplamente utilizado em dispositivos que faziam uso de portas seriais.
@@ -90,7 +112,45 @@ Os bits de dados são dados de usuário ou bits "úteis" e vêm imediatamente de
 - Distância entre pinos: 2,54 mm
 - Dimensões: 49 x 26 x 7 mm (sem considerar os pinos)
 
-## Biblioteca Assembly em C
+## Biblioteca Assembly em C [^sLib]
+
+As funções definidas em assembly que serão chamadas de C devem ser prototipadas como “C” externo em C.
+
+O Exemplo 1 abaixo ilustra uma função C chamada main(), que chama uma função de linguagem assembly chamada asmfunc, que é mostrada no Exemplo 2. A função asmfunc pega seu único argumento, adiciona-o à variável global C chamada gvar e retorna o resultado.
+
+
+Exemplo 1: Chamando uma função de linguagem assembly de um programa C.
+
+```c
+extern "C" {
+extern int asmfunc(int a); /* declare external asm function */
+int gvar = 0; /* define global variable */
+}
+
+void main()
+{
+    int I = 5;
+
+    I = asmfunc(I); /* call function normally */
+}
+```
+Exemplo 2: Programa em linguagem assembly chamado pelo exemplo 1
+
+```s
+         .global asmfunc
+         .global gvar
+asmfunc:
+         LDR r1, gvar_a
+         LDR r2, [r1, #0]
+         ADD r0, r0, r2
+         STR r0, [r1, #0]
+         MOV pc, lr
+gvar_a .field gvar, 32
+```
+
+No programa C do Exemplo 1, a declaração externa “C” diz ao compilador para usar convenções de nomenclatura C (ou seja, sem desmembramento de nomes). Quando o vinculador resolve a referência .global _asmfunc, a definição correspondente no arquivo de montagem corresponderá.
+
+O parâmetro i é passado em R0 e o resultado é retornado em R0. R1 contém o endereço do gvar global. R2 mantém o valor de gvar antes de adicionar o valor i a ele.
 
 ## Sensores Digitais vs Analógicos [^sensores]
 
@@ -116,3 +176,5 @@ Os sensores digitais dominam os sistemas de comunicação porque seus sinais de 
 [^nodemcu]: NodeMCU ESP8266-12 V2 Especificações - [robocore.net](https://www.robocore.net/wifi/nodemcu-esp8266-12-v2)
 
 [^sensores]: Qual é a diferença entre sensores analógicos e digitais - [i.electricianexp.com](https://i.electricianexp.com/pt/main/praktika/1185-analogovye-i-cifrovye-datchiki.html)
+
+[^sLib]: Interfacing C and C++ With Assembly Language - [software-dl.ti.com](https://software-dl.ti.com/codegen/docs/tiarmclang/compiler_tools_user_guide/compiler_manual/runtime_environment/interfacing-c-and-c-with-assembly-language-stdz0544217.html)
