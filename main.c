@@ -1,7 +1,5 @@
-#include "display.h"
-#include "uart_rasp.h"
-
-#include <pthread.h>
+#include "libs/display.h"
+#include "libs/uart_rasp.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,8 +7,6 @@
 
 
 char* msg = "";
-pthread_mutex_t mutex; // variavel de controle para msg
-pthread_t id_thread;
 
 int main() {
     initDisplay();  // inicializa o display lcd
@@ -21,9 +17,6 @@ int main() {
         printf("\nFalha na abertura do arquivo UART!\n");
         return 0;
     }
-
-    //cria uma thread que recebe as mensagens
-    //pthread_create(&id_thread, NULL, receiveMsg, &uart_filestream);
 
     char sensor[] = "0";
     char opcao = '/';
@@ -43,20 +36,19 @@ int main() {
 
         switch(opcao){
             case '1':
-                // alteraMsg("");
                 uart_send("30", uart_filestream);
-                if(strcmp(uart_receive(uart_filestream), "00") == 0){
+                if(strcmp(uart_receive(uart_filestream, 2), "00") == 0){
                     write_textLCD("NodeMCU OK!");
                 }
                 break;
             case '2': // sensor analogico
                 uart_send("40", uart_filestream);
 
-		char texto[] = "";
-		char* result = uart_receive(uart_filestream);
-		sprintf(texto, "Sensor A: %s", result);
+                char texto[] = "";
+                char* result = uart_receive(uart_filestream, 4);
+                sprintf(texto, "Sensor A: %s", result);
 
-		write_textLCD(texto);
+                write_textLCD(texto);
                 break;
             case '3': // sensor digital
                 printf("\nQual sensor digital deseja selecionar? [1-8] \n =>  ");
@@ -64,10 +56,10 @@ int main() {
 
                 if(sensor[0] >= '1' && sensor[0] <= '8' && strlen(sensor) == 1){
                     uart_send("5", uart_filestream);
-	  	    uart_send(sensor, uart_filestream);
+	  	            uart_send(sensor, uart_filestream);
 
                     char texto[] = "";
-                    char* result = uart_receive(uart_filestream);
+                    char* result = uart_receive(uart_filestream, 1); // recebe apenas 1 byte
                     sprintf(texto, "Sensor D%s: %s", sensor, result);
 
                     write_textLCD(texto);
@@ -76,16 +68,14 @@ int main() {
                 }
                 break;
             case '4':
-                // alteraMsg("");
                 uart_send("60", uart_filestream);
-                if(uart_receive(uart_filestream)[0] == '1'){
+                if(uart_receive(uart_filestream, 1)[0] == '1'){ 
                     write_textLCD("LED ligado!");
                 }else{
                     write_textLCD("LED desligado!");
                 }
                 break;
             case '0':
-		// alteraMsg("F"); // sinal para a finalizacao da thread
                 printf("\n\n\tFinalizando...\n");
                 break;
             default:
@@ -94,35 +84,4 @@ int main() {
     } while(opcao != '0');
 
     return 0;
-}
-
-/**
- * Recebe a mensagem e escreve no display continuamente
- * @param uart_filestream - arquivo UART
-*/
-void * receiveMsg(void * uart){
-    int uart_filestream = *((int *) uart);
-    char* texto = "";
-    char* n_msg = "";
-    while(strcmp(msg, "F") != 0){
-        if(strcmp(msg, "") != 0){
-            strcpy(texto, msg); // copia o conteude da msg para outra variavel
-            n_msg = uart_receive(uart_filestream);
-            if(strcmp(n_msg, "") != 0){
-                strcat(texto, n_msg); // concatena o conteudo da da msg com o da nova string
-                write_textLCD(texto);
-            }
-        }
-    }
-}
-
-/**
- * Altera o valor da mensagem utilizando mutex para evitar conflitos
- * @param nova_msg - nova mensagem a ser atribuida
-*/
-void alteraMsg(char* nova_msg){
-    pthread_mutex_lock(&mutex); // segura o recurso
-    msg = nova_msg;
-    pthread_mutex_unlock(&mutex); // libera o recurso
-
 }
