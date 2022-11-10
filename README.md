@@ -35,8 +35,8 @@ O sistema será comandado por um Single Board Computer (SBC), e deve ser capaz d
 
 Esse projeto necessita que o usuário tenha a IDE do Arduino instalada em sua máquina, necessária para comunicação com a NodeMCU. Para isso, siga as instruções do link abaixo:
 
-1. Siga os passos para fazer a [Instalação do Arduino IDE](https://www.arduino.cc/en/Guide/HomePage)
-2. Siga os passos para fazer a [Instalação do Driver da NodeMCU](https://www.arduino.cc/en/Guide/Windows#toc4)
+1. Siga os passos para fazer a [Instalação do Arduino IDE](https://www.arduino.cc/en/Guide/Windows#toc4)
+2. Siga os passos para fazer a [Instalação do Driver da NodeMCU](google.com)
 
 3. Em uma Raspiberry Pi Zero W, clone o repositório.
    ```sh
