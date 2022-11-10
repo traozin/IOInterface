@@ -10,67 +10,163 @@
 
 const char* ssid = STASSID;
 const char* password = STAPSK;
+
+// Nome do ESP na rede
 const char* host = "ESP-10.0.0.109";
 
-int led_pin = LED_BUILTIN;
-#define N_DIMMERS 3
-int dimmer_pin[] = {14, 5, 15};
+// Definições de rede
+IPAddress local_IP(10, 0, 0, 109);
+IPAddress gateway(10, 0, 0, 1);
+IPAddress subnet(255, 255, 0, 0);
 
-void setup() {
+
+/**
+ * Configura a comunicacao com o nodemcu via WIFI
+*/
+void config_connect(){
   Serial.begin(115200);
-  pinMode(led_pin, OUTPUT);
-
-  digitalWrite(led_pin, LOW); //liga o led
-
   Serial.println("Booting");
+
+  // Configuração do IP fixo no roteador, se não conectado, imprime mensagem de falha
+  if (!WiFi.config(local_IP, gateway, subnet)) {
+    Serial.println("STA Failed to configure");
+  }
+  
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password); // conecta a rede wifi
+  WiFi.begin(ssid, password);
   while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    WiFi.begin(ssid, password);
-    Serial.println("Retrying connection...");
-  }
-
-  digitalWrite(led_pin, HIGH); //desliga o led
-
-  /* configure dimmers, and OTA server events */
-  analogWriteRange(1000);
-  analogWrite(led_pin, 990);
-
-  for (int i = 0; i < N_DIMMERS; i++) {
-    pinMode(dimmer_pin[i], OUTPUT);
-    analogWrite(dimmer_pin[i], 50);
-  }
-
-  ArduinoOTA.setHostname(host);
-  ArduinoOTA.onStart([]() { // switch off all the PWMs during upgrade
-    for (int i = 0; i < N_DIMMERS; i++) {
-      analogWrite(dimmer_pin[i], 0);
-    }
-    analogWrite(led_pin, 0);
-  });
-
-  ArduinoOTA.onEnd([]() { // do a fancy thing with our board led at end
-    for (int i = 0; i < 30; i++) {
-      analogWrite(led_pin, 127);
-      delay(50);
-    }
-  });
-
-  ArduinoOTA.onError([](ota_error_t error) {
-    (void)error;
+    Serial.println("Connection Failed! Rebooting...");
+    delay(5000);
     ESP.restart();
-  });
+  }
 
-  /* setup the OTA server */
+  // Hostname defaults to esp8266-[ChipID]
+  ArduinoOTA.setHostname(host);
+
+  ArduinoOTA.onStart([]() {
+    String type;
+    if (ArduinoOTA.getCommand() == U_FLASH) {
+      type = "sketch";
+    } else { // U_FS
+      type = "filesystem";
+    }
+
+    // NOTE: if updating FS this would be the place to unmount FS using FS.end()
+    Serial.println("Start updating " + type);
+  });
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nEnd");
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) {
+      Serial.println("Auth Failed");
+    } else if (error == OTA_BEGIN_ERROR) {
+      Serial.println("Begin Failed");
+    } else if (error == OTA_CONNECT_ERROR) {
+      Serial.println("Connect Failed");
+    } else if (error == OTA_RECEIVE_ERROR) {
+      Serial.println("Receive Failed");
+    } else if (error == OTA_END_ERROR) {
+      Serial.println("End Failed");
+    }
+  });
   ArduinoOTA.begin();
   Serial.println("Ready");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+void setup() {
+  // realiza a configuracao inicial para conexao via wifi com nodemcu
+  config_connect();
+  
+  Serial.begin(9600);
+
+  // definicao dos pinos
+  pinMode(LED_BUILTIN, OUTPUT);  
+
+  // Limpa o burffer da porta serial
+  while(Serial.available() > 0){ 
+    Serial.read();
+  }
+  
+  // pisca o led do nodemcu no momento da execucao
+  for(int i=0; i<10; i++){
+    digitalWrite(LED_BUILTIN,LOW);
+    delay(50);
+    digitalWrite(LED_BUILTIN,HIGH);
+    delay(50);
+  }
 
 }
 
 void loop() {
   ArduinoOTA.handle();
-  digitalWrite(led_pin, HIGH);
-  delay(200);
-  digitalWrite(led_pin, LOW);
-  delay(200);
+  
+  if(Serial.available() > 0){ // Retorna o número de bytes (caracteres) 
+                              // disponíveis para leitura da porta serial.
+    String msg = Serial.readString(); // Le uma String
+    
+    if(msg[0] == '3'){
+      Serial.print("00");
+    }
+    else if(msg[0] == '4'){
+      Serial.print(analogRead(A0));
+    }
+    else if(msg[0] == '5'){
+      int d;
+      switch(msg[1]){
+        case '1':
+          d = D0;
+          break;
+        case '2':
+          d = D1;
+          break;
+        case '3':
+          d = D2;
+          break;
+        case '4':
+          d = D3;
+          break;
+        case '5':
+          d = D4;
+          break;
+        case '6':
+          d = D5;
+          break;
+        case '7':
+          d = D6;
+          break;
+        case '8':
+          d = D7;
+          break;
+      }
+      Serial.print(digitalRead(d));
+    }
+    else if(msg[0] == '6'){
+      if(digitalRead(LED_BUILTIN) == HIGH){
+        digitalWrite(LED_BUILTIN, LOW);
+        Serial.print("1");
+      }
+      else{
+        digitalWrite(LED_BUILTIN, HIGH);
+        Serial.print("0");
+      }
+    }
+    else{
+      // envia a mensagem de erro
+      Serial.print("1F");
+      // pisco o led caso a mensagem nao seja reconhecida
+      for(int i=0; i<5; i++){
+        digitalWrite(LED_BUILTIN,LOW);
+        delay(400);
+        digitalWrite(LED_BUILTIN,HIGH);
+        delay(400);
+      }
+    }
+  } 
 }
