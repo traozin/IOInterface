@@ -36,11 +36,11 @@ O sistema será comandado por um Single Board Computer (SBC), e deve ser capaz d
 Esse projeto necessita que o usuário tenha a IDE do Arduino instalada em sua máquina, necessária para comunicação com a NodeMCU. Para isso, siga as instruções do link abaixo:
 
 1. Siga os passos para fazer a [Instalação do Arduino IDE](https://www.arduino.cc/en/Guide/Windows#toc4).
-2. Siga os passos para fazer a [Instalação do Driver da NodeMCU](google.com).
+2. Siga os passos para fazer a [Instalação do Driver da NodeMCU](https://www.blogdarobotica.com/2020/05/26/instalando-driver-serial-para-nodemcu-com-chip-ch340/).
 3. Baixe o arquivo main_esp.ino e faça upload para o NodeMCU.
 4. Em uma Raspiberry Pi Zero W, clone o repositório.
    ```sh
-   git clone https://github.com/ozenilsoncruz/IOInterface.git
+   git clone https://github.com/traozin/IOInterface
    ```
 5. Dentro da pasta do repositório execute os passos abaixo: 
     1. Makefile:
