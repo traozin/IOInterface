@@ -150,9 +150,46 @@ Já a transmissão assíncrona permite que os dados sejam transmitidos sem que o
 Como o próprio nome já diz, o UART é um protocolo de comunicação assíncrona, sendo assim, ambas as extremidades devem transmitir ao mesmo tempo e em velocidade predefinida para poder ter a mesma temporização de bits. As taxas de baud mais comuns utilizadas em UART atualmente são 4800, 9600, 19,2 K, 57,6 K e 115,2 K. Além de ter a mesma taxa de bauds, ambos os lados de uma conexão UART também têm que usar a mesma estrutura de frames e parâmetros.
 
 <p align="center"><img src="assets/frame-uart.png"/></p>
-<p align="center">Frame UART</figcaption></p>
+<p align="center">Frame UART</p>
 
 Frames UART contém bits iniciais e finais, bits de dados e um bit opcional de paridade.
+
+Na conexão da UART temos dois dispositivos, o pino transmitter, também chamado de TX, responsável pela transmissão do dado, e o pino receiver, também chamado de RX, responsável por receber um dado transmitido. Ambos os pinos devem estar conectados entre si para que a comunicação ocorra. O diagrama de blocos abaixo esquematiza as conexões entre a SBC e o NodeMCU. 
+
+<p align="center"><img src="assets/diagrama.png"/></p>
+<p align="center">Comunicação UART SBC/NodeMCU </p>
+
+A comunicação é iniciada pela SBC que realiza requisições que devem ser interpretadas pelo NodeMCU. As requisições são sempre de dois bytes, o primeiro byte representa o comando a ser solicitado e o segundo o endereço do sensor. Dessa forma, em comandos que não necessitam necessariamente de um endereço do sensor, o segundo byte é '0'. Os comandos de requisições estão na tabela abaixo.
+
+<table class="tg" align= "center">
+<thead>
+  <tr>
+    <th class="tg-amwm">Código</th>
+    <th class="tg-amwm">Descrição do comando<br></th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-baqh">'3'</td>
+    <td class="tg-baqh">Solicita a situação atual do NodeMCU</td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">'4'</td>
+    <td class="tg-baqh">Solicita o valor da entrada analógica</td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">'5'</td>
+    <td class="tg-baqh">Solicita o valor de uma das entradas digitais</td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">'6'</td>
+    <td class="tg-baqh">Acendimento do led da NodeMCU</td>
+  </tr>
+</tbody>
+</table>
+<p align="center">Comandos de requisição</p>
+
+Em caso da NodeMCU receber uma mensagem que não pôde ser codificada, uma mensagem de resposta contendo '1F' é retornada sinalizando que a NodeMCU está com problema.
 
 ##### Bits iniciais e finais
 
@@ -166,11 +203,6 @@ Depois que os bits de dados tiverem terminado, o bit final indica o fim dos dado
 ##### Bits de dados
 
 Os bits de dados são dados de usuário ou bits "úteis" e vêm imediatamente depois do bit inicial. Pode haver de 5 a 9 bits de dados de usuários, apesar de ser mais comum haver 7 ou 8 bits. Esses bits de dados geralmente são transmitidos com o bit menos significativo primeiro.
-
-
-<p align="center"><img src="assets/diagrama.png"/></p>
-<p align="center">Diagrama de blocos da comunicação UART</p>
-
 
 ### Comunicação UART na SBC
 --------------------------------------------------------------------------
@@ -302,21 +334,38 @@ void * receiveMsg(void * dados){
     }
 }
 ```
---------------------------------------------------------------------------
 
 ### Comunicação UART na NodeMCU [^arduino]
 --------------------------------------------------------------------------
 Na NodeMCU a comunicação via UART foi construida utilizando a classe Serial
 da linguagem do arduino que facilitou a implementação por abstrais algumas informações. Os métodos utilizados foram:
-- *Serial.avaliable()*:  Retorna o número de bytes disponíveis para leitura da porta serial.
-- *Serial.begin()*: Define a taxa de dados em bits por segundo (baud) para transmissão serial de dados (baud-rate).
+- *Serial.avaliable()*:  Verifica a quantidade de bytes disponíveis para leitura da porta serial. 
+- *Serial.begin()*: Define a taxa de dados em bits por segundo (baud) para transmissão serial de dados (baud-rate). Assim como na SBC, o baud-rate foi definido como 9600 bps.
 - *Serial.readString()*: Lê caracteres do buffer serial em uma String.
-- *Serial.print()*: Imprime dados na porta serial como texto ASCII legível por humanos.
+- *Serial.print()*: Imprime dados na porta serial como texto ASCII legível por humanos. Usado para enviar uma string para a SBC.
 
---------------------------------------------------------------------------
-
+No código abaixo temos um exemplo da utilização de alguns desses métodos. O *available()* verifica se tem mensagem para ser lida, *readString()* lê a mensagems retornando uma String e *print()* envia uma String como resposta.
+```cpp
+if(Serial.available() > 0){ // Retorna o número de bytes (caracteres) 
+                              // disponíveis para leitura da porta serial.
+    String msg = Serial.readString(); // Le uma String
+    
+    if(msg[0] == '3'){
+      Serial.print("00");
+    }
+...
+}
+```
 
 ## Testes
+
+
+
+## Conclusão
+Por meio deste projeto, conceitos importantes de comunicação serial foram devidamente incorporados e compreendidos para a solução, bem como a utilidade da utilização de microcontroladores para diversos tipos de aplicações.
+
+O código deste projeto é capaz de resolver o problema apresentado utilizando de bibliotes nativas das linguagens C e Arduino. Toda via, algumas das soluções podem não apresentar o melhor funcionamento possível e as atualizações que aprimoram o código anterior não foram devidamente testadas.
+
 
 [^rohde-uart]: Compreender UART - [rohde-schwarz.com](https://www.rohde-schwarz.com/br/produtos/teste-e-medicao/osciloscopios/educational-content/compreender-uart_254524.html)
 
