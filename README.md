@@ -99,10 +99,8 @@ O parâmetro i é passado em R0 e o resultado é retornado em R0. R1 contém o e
 
 ## Node MCU [^nodemcu]
 
-<figure style="align:center">
-  <img src="assets/pinagem-nodemcu.png" height="350em"/>
-  <figcaption>Diagrama de Mapeamento de Pinos do ESP8266</figcaption>
-</figure>
+<p align="center"><img src="assets/pinagem-nodemcu.png" height="350em"/></p>
+<p align="center">Diagrama de Mapeamento de Pinos do ESP8266</p>
 
 - Módulo NodeMcu Lua ESP-12E
 - Versão do módulo: V2
@@ -151,11 +149,8 @@ Já a transmissão assíncrona permite que os dados sejam transmitidos sem que o
 
 Como o próprio nome já diz, o UART é um protocolo de comunicação assíncrona, sendo assim, ambas as extremidades devem transmitir ao mesmo tempo e em velocidade predefinida para poder ter a mesma temporização de bits. As taxas de baud mais comuns utilizadas em UART atualmente são 4800, 9600, 19,2 K, 57,6 K e 115,2 K. Além de ter a mesma taxa de bauds, ambos os lados de uma conexão UART também têm que usar a mesma estrutura de frames e parâmetros.
 
-<figure style="align:center">
-  <img src="assets/frame-uart.png"/>
-  <figcaption>Frame UART</figcaption>
-</figure>
-
+<p align="center"><img src="assets/frame-uart.png"/></p>
+<p align="center">Frame UART</figcaption></p>
 
 Frames UART contém bits iniciais e finais, bits de dados e um bit opcional de paridade.
 
@@ -173,10 +168,9 @@ Depois que os bits de dados tiverem terminado, o bit final indica o fim dos dado
 Os bits de dados são dados de usuário ou bits "úteis" e vêm imediatamente depois do bit inicial. Pode haver de 5 a 9 bits de dados de usuários, apesar de ser mais comum haver 7 ou 8 bits. Esses bits de dados geralmente são transmitidos com o bit menos significativo primeiro.
 
 
-<div align="center">
-  <img src="assets/diagrama.png"/>
-  <figcaption>Diagrama de blocos da comunicação UART</figcaption>
-</div>
+<p align="center"><img src="assets/diagrama.png"/></p>
+<p align="center">Diagrama de blocos da comunicação UART</p>
+
 
 ### Comunicação UART na SBC
 --------------------------------------------------------------------------
