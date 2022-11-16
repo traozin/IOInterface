@@ -359,7 +359,18 @@ if(Serial.available() > 0){ // Retorna o número de bytes (caracteres)
 
 ## Testes
 
+Para averiguar o funcionamento correto do projeto implementado os seguintes testes foram realizados:
 
+- Solicitação do status da NodeMCU;
+- Envio de uma mensagem não esperada pela NodeMCU;
+- Acendimento e apagamento do LED múltiplas vezes;
+- Solicitação de um sensor digital não pinado;
+- Múltiplas solicitações de sensores digitais pinados e acionados no momento da solicitação;
+- Solicitação do valor da entrada analógica no momento em que está com o menor valor possível;
+- Solicitação do valor da entrada analógica no momento em que está com o menor valor possível;
+- Solicitação do valor da entrada analógica múltiplas enquanto o pino é alterado;
+
+Todos os testes funcionaram da forma planejada e retornaram os valores esperados. Entretanto, quando multiplas solicitações foram realizadas, o tempo de espera para os recebimento das mensagens foi muito longo pois a função de recebimento ainda contava com o delay.
 
 ## Conclusão
 Por meio deste projeto, conceitos importantes de comunicação serial foram devidamente incorporados e compreendidos para a solução, bem como a utilidade da utilização de microcontroladores para diversos tipos de aplicações.
