@@ -57,126 +57,6 @@ Esse projeto necessita que o usuário tenha a IDE do Arduino instalada em sua m�
           sudo ./main
           ```
 
-## UART [^rohde-uart] [^freebsd-uart]
-
-O UART(Transmissor/receptor assíncrono universal) é um protocolo de transmissão de dados muito simples, onde só é necessário apenas dois fios para a comunicação entre suas extremidades em ambas as direções. Além disso, o UART é um dos padrões seriais mais antigos do mundo, onde acabou sendo amplamente utilizado em dispositivos que faziam uso de portas seriais.
-
-Existem dois tipos de comunicação Serial, a Síncrona e a Assíncrona. 
-
-A comunicação Síncrona requer que o emissor e o receptor dos dados tenham um clock em comum, ou no mínimo, o emissor forneça um sinal de tempo para que o receptor saiba quando se deve "ler" o próximo bit dos dados. Na maioria das formas de comunicação serial síncrona, se não houver dados disponíveis em um dado instante para transmitir, um caractere de preenchimento deve ser enviado para que os dados sejam sempre transmitidos.
-
-Já a transmissão assíncrona permite que os dados sejam transmitidos sem que o emissor tenha que enviar um sinal de relógio ao receptor. Em vez disso, o remetente e o receptor devem concordar com os parâmetros de tempo de antecedência e bits especiais são adicionados a cada palavra, os quais são usados para sincronizar as unidades de envio e recebimento.
-
-Como o próprio nome já diz, o UART é um protocolo de comunicação assíncrona, sendo assim, ambas as extremidades devem transmitir ao mesmo tempo e em velocidade predefinida para poder ter a mesma temporização de bits. As taxas de baud mais comuns utilizadas em UART atualmente são 4800, 9600, 19,2 K, 57,6 K e 115,2 K. Além de ter a mesma taxa de bauds, ambos os lados de uma conexão UART também têm que usar a mesma estrutura de frames e parâmetros.
-
-<figure style="align:center">
-  <img src="assets/frame-uart.png"/>
-  <figcaption>Frame UART</figcaption>
-</figure>
-
-
-Frames UART contém bits iniciais e finais, bits de dados e um bit opcional de paridade.
-
-##### Bits iniciais e finais
-
-Devido ao UART ser assíncrono, o transmissor precisa sinalizar que os bits de dados estão chegando. Isso é possível ao utilizar o bit inicial. O bit inicial é uma transição do estado inativo para um estado baixo, imediatamente seguido pelos bits de dados do usuário.
-
-Depois que os bits de dados tiverem terminado, o bit final indica o fim dos dados do usuário. O bit de parada é uma transição de volta para o estado alto ou inativo, ou a permanência no estado alto for um tempo de bit adicional.
-
-##### Bit de paridade
- Um segundo bit final (opcional) pode ser configurado, geralmente para dar ao receptor tempo para se preparar para o próximo frame, mas essa é uma prática relativamente incomum.
-
-##### Bits de dados
-
-Os bits de dados são dados de usuário ou bits "úteis" e vêm imediatamente depois do bit inicial. Pode haver de 5 a 9 bits de dados de usuários, apesar de ser mais comum haver 7 ou 8 bits. Esses bits de dados geralmente são transmitidos com o bit menos significativo primeiro.
-
---------------------------------------------------------------------------
-##### Problema
-```c
-/**
- * Envia uma mensagem via UART
- * @param uart_filestream - arquivo uart
-*/
-char* uart_receive(int uart_filestream){
-	static char mensagem[] = ""; //define o tamanho da mensagem
-	int msg_length = -1;
-	sleep(2);
-
-	while(msg_length <= 0){ // se a mensagem for menor ou igual a zero
-		msg_length = read(uart_filestream, (void*)mensagem, 5); // ate 5 bytes
-		if(msg_length > 0){
-			mensagem[msg_length] = '\0';
-			if(strcmp(mensagem, "1F") == 0){
-				char texto[] = "Erro na NodeMCU!";
-				write_textLCD(texto);
-			}
-		}
-	}
-	return mensagem;
-}
-```
-
-##### Solução
-
-```c
-/**
- * Envia uma mensagem com o tamanho especificado
- * @param uart_filestream - arquivo uart
- * @param tamanho_mensagem - tamanho da mensagem a ser recebida
-*/
-char* uart_receive(int uart_filestream, int tamanho_mensagem){
-	static char mensagem[] = ""; //define o tamanho da mensagem
-	int tamanho = 0;
-	int tamanho_mensagem_aux = tamanho_mensagem;
-
-	while(tamanho < tamanho_mensagem){ // se a mensagem for menor ou igual a zero
-		char aux[] = ""; //variavel auxiliar que armazena o tamanho da string
-		msg_length = read(uart_filestream, (void*)aux, tamanho_mensagem_aux);
-		
-		if(msg_length > 0){
-			aux[msg_length] = '\0';
-			if(strcmp(aux, "1F") == 0){
-				char texto[] = "Erro na NodeMCU!";
-				mensagem = ""
-				write_textLCD(texto);
-			}else{
-				tamanho = tamanho + msg_length;
-				tamanho_mensagem_aux = tamanho_mensagem_aux - msg_length;
-				sprintf(mensagem, "%s", aux); // concatena o resultado dentro do loop 
-			}
-		}
-	}
-	return mensagem;
-}
-```
---------------------------------------------------------------------------
-
-## Node MCU [^nodemcu]
-
-<figure style="align:center">
-  <img src="assets/pinagem-nodemcu.png" height="350em"/>
-  <figcaption>Diagrama de Mapeamento de Pinos do ESP8266</figcaption>
-</figure>
-
-- Módulo NodeMcu Lua ESP-12E
-- Versão do módulo: V2
-- Memória flash: 4 MB
-- Tensão de operação:
-- Pinos Digitais: 3,3 V
-- Pino Analógico: 1,0 V
-- Wireless padrão 802.11 b/g/n
-- Antena embutida
-- Conector micro-usb para programação e alimentação
-- Modos de operação: STA/AP/STA+AP
-- Suporta 5 conexões TCP/IP
-- Portas GPIO: 13
-- D0 (GPIO16) só pode ser usado como entrada ou saída, não suporta outras funções (interrupção, PWM, I2C, etc)
-- GPIO com funções de PWM, I2C, SPI, etc
-- Resolução do PWM: 10 bits (valores de 0 a 1023)
-- 01x Conversor analógico digital (ADC)
-- Distância entre pinos: 2,54 mm
-- Dimensões: 49 x 26 x 7 mm (sem considerar os pinos)
-
 ## Biblioteca Assembly em C [^sLib]
 
 As funções definidas em assembly que serão chamadas de C devem ser prototipadas como “C” externo em C.
@@ -217,6 +97,32 @@ No programa C do Exemplo 1, a declaração externa “C” diz ao compilador par
 
 O parâmetro i é passado em R0 e o resultado é retornado em R0. R1 contém o endereço do gvar global. R2 mantém o valor de gvar antes de adicionar o valor i a ele.
 
+## Node MCU [^nodemcu]
+
+<figure style="align:center">
+  <img src="assets/pinagem-nodemcu.png" height="350em"/>
+  <figcaption>Diagrama de Mapeamento de Pinos do ESP8266</figcaption>
+</figure>
+
+- Módulo NodeMcu Lua ESP-12E
+- Versão do módulo: V2
+- Memória flash: 4 MB
+- Tensão de operação:
+- Pinos Digitais: 3,3 V
+- Pino Analógico: 1,0 V
+- Wireless padrão 802.11 b/g/n
+- Antena embutida
+- Conector micro-usb para programação e alimentação
+- Modos de operação: STA/AP/STA+AP
+- Suporta 5 conexões TCP/IP
+- Portas GPIO: 13
+- D0 (GPIO16) só pode ser usado como entrada ou saída, não suporta outras funções (interrupção, PWM, I2C, etc)
+- GPIO com funções de PWM, I2C, SPI, etc
+- Resolução do PWM: 10 bits (valores de 0 a 1023)
+- 01x Conversor analógico digital (ADC)
+- Distância entre pinos: 2,54 mm
+- Dimensões: 49 x 26 x 7 mm (sem considerar os pinos)
+
 ## Sensores Digitais vs Analógicos [^sensores]
 
 O termo "sensor" em si significa um mecanismo projetado para medir um parâmetro, a fim de processar ainda mais o resultado da medição. O circuito do sensor gera um sinal de forma conveniente para a transmissão e, em seguida, o sinal é convertido, processado ou armazenado.
@@ -233,6 +139,185 @@ Os sensores digitais, por sua vez, geram um sinal de saída que pode ser gravado
 
 Os sensores digitais dominam os sistemas de comunicação porque seus sinais de saída são facilmente regenerados no repetidor, mesmo se houver ruído. E o sinal analógico, nesse sentido, será distorcido pelo ruído e os dados serão imprecisos. Ao transmitir informações, os sensores digitais são mais aceitáveis. Eles são adequados para detectar a presença ou ausência de um objeto, por exemplo.
 
+## UART [^rohde-uart] [^freebsd-uart]
+
+O UART(Transmissor/receptor assíncrono universal) é um protocolo de transmissão de dados muito simples, onde só é necessário apenas dois fios para a comunicação entre suas extremidades em ambas as direções. Além disso, o UART é um dos padrões seriais mais antigos do mundo, onde acabou sendo amplamente utilizado em dispositivos que faziam uso de portas seriais.
+
+Existem dois tipos de comunicação Serial, a Síncrona e a Assíncrona. 
+
+A comunicação Síncrona requer que o emissor e o receptor dos dados tenham um clock em comum, ou no mínimo, o emissor forneça um sinal de tempo para que o receptor saiba quando se deve "ler" o próximo bit dos dados. Na maioria das formas de comunicação serial síncrona, se não houver dados disponíveis em um dado instante para transmitir, um caractere de preenchimento deve ser enviado para que os dados sejam sempre transmitidos.
+
+Já a transmissão assíncrona permite que os dados sejam transmitidos sem que o emissor tenha que enviar um sinal de relógio ao receptor. Em vez disso, o remetente e o receptor devem concordar com os parâmetros de tempo de antecedência e bits especiais são adicionados a cada palavra, os quais são usados para sincronizar as unidades de envio e recebimento.
+
+Como o próprio nome já diz, o UART é um protocolo de comunicação assíncrona, sendo assim, ambas as extremidades devem transmitir ao mesmo tempo e em velocidade predefinida para poder ter a mesma temporização de bits. As taxas de baud mais comuns utilizadas em UART atualmente são 4800, 9600, 19,2 K, 57,6 K e 115,2 K. Além de ter a mesma taxa de bauds, ambos os lados de uma conexão UART também têm que usar a mesma estrutura de frames e parâmetros.
+
+<figure style="align:center">
+  <img src="assets/frame-uart.png"/>
+  <figcaption>Frame UART</figcaption>
+</figure>
+
+
+Frames UART contém bits iniciais e finais, bits de dados e um bit opcional de paridade.
+
+##### Bits iniciais e finais
+
+Devido ao UART ser assíncrono, o transmissor precisa sinalizar que os bits de dados estão chegando. Isso é possível ao utilizar o bit inicial. O bit inicial é uma transição do estado inativo para um estado baixo, imediatamente seguido pelos bits de dados do usuário.
+
+Depois que os bits de dados tiverem terminado, o bit final indica o fim dos dados do usuário. O bit de parada é uma transição de volta para o estado alto ou inativo, ou a permanência no estado alto for um tempo de bit adicional.
+
+##### Bit de paridade
+ Um segundo bit final (opcional) pode ser configurado, geralmente para dar ao receptor tempo para se preparar para o próximo frame, mas essa é uma prática relativamente incomum.
+
+##### Bits de dados
+
+Os bits de dados são dados de usuário ou bits "úteis" e vêm imediatamente depois do bit inicial. Pode haver de 5 a 9 bits de dados de usuários, apesar de ser mais comum haver 7 ou 8 bits. Esses bits de dados geralmente são transmitidos com o bit menos significativo primeiro.
+
+
+### Comunicação UART na SBC
+--------------------------------------------------------------------------
+A SBC é uma Raspberry Pi Zero W e para sua implementação as bibliotecas `unistd.h`, `fcntl.h` e `termios.h` foram utilizadas seguindo os seguintes passos:
+- Mapeamento da memória da uart: utiliza a função open(“/dev/serial0”, tipos de abertura). Os tipos de abertura foram O_RDWR, O_NOCTTY, O_NDELAY, que abre no modo de leitura/gravação sem bloqueio; 
+- Configuração das flags: cria uma estrutura que define o comportamento da comunicação, como valor de baud-rate em 9600 e se tem ou não paridade;
+
+O código de configuração da comunicação UART pode ser observado abaixo. 
+```c
+/**
+ * Realiza as configuracoes iniciais da UART
+ */
+int uart_config(){
+    //Abertura do arquivo da UART
+	int uart_filestream = -1;
+	uart_filestream = open("/dev/serial0", O_RDWR | O_NOCTTY | O_NDELAY); // Abre em modo escrita/leitura bloqueado
+	if (uart_filestream == -1){
+		printf("\nFalha na abertura do arquivo!\n");
+        return uart_filestream;
+	}
+
+    struct termios options;
+    tcgetattr(uart_filestream, &options);
+    options.c_cflag = B9600 | CS8 | CLOCAL | CREAD;
+    options.c_iflag = IGNPAR;
+    options.c_oflag = 0;
+    options.c_lflag = 0;
+    tcflush(uart_filestream, TCIFLUSH);
+    tcsetattr(uart_filestream, TCSANOW, &options);
+
+    return uart_filestream;
+}
+```
+
+Após a configuração inicial da Raspberry, os métodos de envio e recebimento de mensagens podem ser chamados para realizar a comunicação. No código abaixo encontra-se a implementação da função de envio de mensagem ,*uart_send()*, que envia um conjunto de caracteres via UART utilizando a função *write()* presente na biblioteca `unistd.h`.
+```c
+/**
+ * Envia uma mensagem via UART
+ * @param msg - texto a ser enviado
+ * @param uart_filestream - arquivo uart
+*/
+void uart_send(char* msg, int uart_filestream){
+	if(write(uart_filestream, msg, strlen(msg)) == -1){
+		printf("\nFalha ao enviar mensagem!\n");
+	}
+}
+```
+
+A função responsável por receber as mensagens é a *uart_receive()*, que utiliza a função *read()*, também presente em `unistd.h`, para ler uma determinada quantidade de bytes. Devido a alguns erros ocorrerem em mensagens superiores a 2 bytes, como a não chegada da mensagem completa ou mesmo de dados não decifráveis, antes de fazer uma leitura a função aguardava um tempo de 2 segundos (alguns testes mostraram que 1 segundo era suficiente para receber até 4 bytes, mas, para evitar eventuais falhas fora adicionado um tempo maior).
+
+```c
+/**
+ * Envia uma mensagem via UART
+ * @param uart_filestream - arquivo uart
+*/
+char* uart_receive(int uart_filestream){
+	static char mensagem[] = ""; //define o tamanho da mensagem
+	int msg_length = -1;
+	sleep(2);
+
+	while(msg_length <= 0){ // se a mensagem for menor ou igual a zero
+		msg_length = read(uart_filestream, (void*)mensagem, 5); // ate 5 bytes
+		if(msg_length > 0){
+			mensagem[msg_length] = '\0';
+			if(strcmp(mensagem, "1F") == 0){
+				char texto[] = "Erro na NodeMCU!";
+				write_textLCD(texto);
+			}
+		}
+	}
+	return mensagem;
+}
+```
+
+Essa abordagem não é eficiente pois nada garante que a mensagem chegue no período de 2 segundos. Dessa forma, a função *uart_receive()* foi atualizada para permitir escolher uma quantidade de bytes que deseja que a mensagem contenha realizando, se necessário, mais de uma leitura para uma mensagem.
+
+```c
+/**
+ * Envia uma mensagem com o tamanho especificado
+ * @param uart_filestream - arquivo uart
+ * @param tamanho_mensagem - tamanho da mensagem a ser recebida
+*/
+char* uart_receive(int uart_filestream, int tamanho_mensagem){
+	static char mensagem[] = ""; //define o tamanho da mensagem
+	int tamanho = 0;
+	int tamanho_mensagem_aux = tamanho_mensagem;
+
+	while(tamanho < tamanho_mensagem){ // se a mensagem for menor ou igual a zero
+		char aux[] = ""; //variavel auxiliar que armazena o tamanho da string
+		msg_length = read(uart_filestream, (void*)aux, tamanho_mensagem_aux);
+		
+		if(msg_length > 0){
+			aux[msg_length] = '\0';
+			if(strcmp(aux, "1F") == 0){
+				char texto[] = "Erro na NodeMCU!";
+				mensagem = ""
+				write_textLCD(texto);
+			}else{
+				tamanho = tamanho + msg_length;
+				tamanho_mensagem_aux = tamanho_mensagem_aux - msg_length;
+				sprintf(mensagem, "%s", aux); // concatena o resultado dentro do loop 
+			}
+		}
+	}
+	return mensagem;
+}
+```
+
+Apesar da função resolver o problema de espera, como é necessario aguardar que pelo menos um byte seja recebido, a SBC pode acabar entrando em um estado de espera continua, sem poder realizar novas solicitações. Pensando nisso, outra abordagem utilizando threads para programação concorrente foi desenvolvida e pode ser visto em `main_threads.c`. Basicamente, realiza os recebimentos das mensagens sem a necessidade de realizar novas solicitações manuais constantemente. 
+A função *receiveMsg()* será executada em uma thread e contem um loop que é executado a depender de alguns dados das variáveis globais _msgg_, informação a ser exibida no display, e _solicitacao_, solicitação para NodeMCU. Esses dados são recebidos e atualizados no display de LCD constantemente. A função foi utilizada apenas para as solicitações que precisam ser atualizadas a cada mudança de valor como as informações das entradas analógicas e digitais.
+
+```c
+/**
+ * Recebe a mensagem e escreve no display continuamente
+ * @param dados[2] - contem o arquivo uart em dados[0] e 
+ * 					 a qtd de bytes a serem recebidos em dados[1]
+*/
+void * receiveMsg(void * dados){
+    int d[] = *((int *) dados);
+
+    char texto[] = "";
+    while(strcmp(msgg, "") != 0 || strcmp(solicitacao, "") != 0){ // enquanto a mensagem de finalizacao n$
+        uart_send(solicitacao,  d[0]);
+        char* result = uart_receive(d[0], d[1]);
+        if(strcmp(result, "") != 0){
+            sprintf(texto, "%s%s", msgg, result); // concatena o conte$
+            write_textLCD(texto);
+        }
+    }
+}
+```
+--------------------------------------------------------------------------
+
+### Comunicação UART na NodeMCU [^arduino]
+--------------------------------------------------------------------------
+Na NodeMCU a comunicação via UART foi construida utilizando a classe Serial
+da linguagem do arduino que facilitou a implementação por abstrais algumas informações. Os métodos utilizados foram:
+- *Serial.avaliable()*:  Retorna o número de bytes disponíveis para leitura da porta serial.
+- *Serial.begin()*: Define a taxa de dados em bits por segundo (baud) para transmissão serial de dados (baud-rate).
+- *Serial.readString()*: Lê caracteres do buffer serial em uma String.
+- *Serial.print()*: Imprime dados na porta serial como texto ASCII legível por humanos.
+
+--------------------------------------------------------------------------
+
+
+## Testes
 
 [^rohde-uart]: Compreender UART - [rohde-schwarz.com](https://www.rohde-schwarz.com/br/produtos/teste-e-medicao/osciloscopios/educational-content/compreender-uart_254524.html)
 
@@ -243,3 +328,5 @@ Os sensores digitais dominam os sistemas de comunicação porque seus sinais de 
 [^sensores]: Qual é a diferença entre sensores analógicos e digitais - [i.electricianexp.com](https://i.electricianexp.com/pt/main/praktika/1185-analogovye-i-cifrovye-datchiki.html)
 
 [^sLib]: Interfacing C and C++ With Assembly Language - [software-dl.ti.com](https://software-dl.ti.com/codegen/docs/tiarmclang/compiler_tools_user_guide/compiler_manual/runtime_environment/interfacing-c-and-c-with-assembly-language-stdz0544217.html)
+
+[^arduino]: Serial - [arduino.cc](https://www.arduino.cc/reference/en/language/functions/communication/serial/)
