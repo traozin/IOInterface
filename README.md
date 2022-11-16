@@ -173,6 +173,11 @@ Depois que os bits de dados tiverem terminado, o bit final indica o fim dos dado
 Os bits de dados são dados de usuário ou bits "úteis" e vêm imediatamente depois do bit inicial. Pode haver de 5 a 9 bits de dados de usuários, apesar de ser mais comum haver 7 ou 8 bits. Esses bits de dados geralmente são transmitidos com o bit menos significativo primeiro.
 
 
+<div align="center">
+  <img src="assets/diagrama.png"/>
+  <figcaption>Diagrama de blocos da comunicação UART</figcaption>
+</div>
+
 ### Comunicação UART na SBC
 --------------------------------------------------------------------------
 A SBC é uma Raspberry Pi Zero W e para sua implementação as bibliotecas `unistd.h`, `fcntl.h` e `termios.h` foram utilizadas seguindo os seguintes passos:
