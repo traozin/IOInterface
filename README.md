@@ -377,6 +377,9 @@ Por meio deste projeto, conceitos importantes de comunicação serial foram devi
 
 O código deste projeto é capaz de resolver o problema apresentado utilizando de bibliotes nativas das linguagens C e Arduino. Toda via, algumas das soluções podem não apresentar o melhor funcionamento possível e as atualizações que aprimoram o código anterior não foram devidamente testadas.
 
+| :arrow_left: [Problema anterior](https://github.com/ozenilsoncruz/timer_assembly) |............................... :arrow_up: [Voltar ao topo](#analisador-léxico) :arrow_up: ...............................| [Próximo problema](https://github.com/ozenilsoncruz/IoMQTT) :arrow_right: | 
+| :----: |-----| :-----:|
+
 
 [^rohde-uart]: Compreender UART - [rohde-schwarz.com](https://www.rohde-schwarz.com/br/produtos/teste-e-medicao/osciloscopios/educational-content/compreender-uart_254524.html)
 
